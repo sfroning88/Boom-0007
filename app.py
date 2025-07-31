@@ -15,14 +15,43 @@ qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
 def home():
     return render_template('chat.html')
 
-# generic button function
-@app.route('/BUTTON_FUNCTION_ONE', methods=['POST'])
-def BUTTON_FUNCTION_ONE():
+# connecting first time to qbo for authorization
+@app.route('/CONNECT_QBO', methods=['POST'])
+def CONNECT_QBO():
     try:
-        return jsonify({'success': True, 'message': 'Button Function One success.'}), 200
+        # Generate OAuth URL for user to authorize once
+        from api.connect import get_oauth_url
+        oauth_url = get_oauth_url(qbo_token, qbo_account)
+        
+        if oauth_url:
+            return jsonify({'success': True, 'message': 'Redirecting to QBO authorization...', 'redirect_url': oauth_url}), 200
+        else:
+            return jsonify({'success': False, 'message': 'Failed to generate OAuth URL'}), 400
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/oauth/callback')
+def oauth_callback():
+    try:
+        auth_code = request.args.get('code')
+        realm_id = request.args.get('realmId')
+        
+        if not auth_code or not realm_id:
+            return jsonify({'success': False, 'message': 'Missing authorization code or realm ID'}), 400
+        
+        # Connect to QBO with the received auth code and store refresh token
+        from api.connect import connect_qbo
+        success = connect_qbo(qbo_token, qbo_account, auth_code, realm_id)
+        
+        if success:
+            # Show success page that will update the main app
+            return render_template('oauth_success.html', message='QBO connection established successfully! Refresh token stored for future use.')
+        else:
+            return render_template('oauth_error.html', message='Failed to establish QBO connection')
+            
+    except Exception as e:
+        return render_template('oauth_error.html', message=str(e))
 
 # generic button function
 @app.route('/BUTTON_FUNCTION_TWO', methods=['POST'])

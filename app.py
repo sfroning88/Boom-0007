@@ -96,10 +96,16 @@ def UPLOAD_FILE():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-@app.route('/POST_BILLS', methods=['POST'])
-def POST_BILLS():
+@app.route('/POST_INVOICES', methods=['POST'])
+def POST_INVOICES():
     try:
-        return jsonify({'success': True, 'message': 'Posting Bills success.'}), 200
+        from api.invoices import post_invoices
+        result = post_invoices(files)
+
+        if result:
+            return jsonify({'success': True, 'message': 'Posting Invoices success.'}), 200
+        
+        return jsonify({'success': False, 'message': 'Posting Invoices failed.'}), 400
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

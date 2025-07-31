@@ -90,10 +90,10 @@ def UPLOAD_FILE():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-@app.route('/BUTTON_FUNCTION_THREE', methods=['POST'])
-def BUTTON_FUNCTION_THREE():
+@app.route('/POST_BILLS', methods=['POST'])
+def POST_BILLS():
     try:
-        return jsonify({'success': True, 'message': 'Button Function Three success.'}), 200
+        return jsonify({'success': True, 'message': 'Posting Bills success.'}), 200
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

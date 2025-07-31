@@ -5,6 +5,12 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
 
+# get Quickbooks Online token
+qbo_token = os.environ.get('QBO_API_KEY')
+
+# get Quickbooks Online account
+qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
+
 @app.route('/')
 def home():
     return render_template('chat.html')

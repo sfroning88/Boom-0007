@@ -22,7 +22,7 @@ def extract_vendors(file, exte):
         row = df.iloc[i]
         
         try:
-            current_transaction = {
+            current_vendor = {
                 'Vendor': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
                 'Account #': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
                 'Bill From': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
@@ -32,7 +32,7 @@ def extract_vendors(file, exte):
                 'Balance Total': round(float(row.iloc[14]), 2) if pd.notna(row.iloc[14]) else None
             }
 
-            extracted[vendor_counter] = current_transaction
+            extracted[vendor_counter] = current_vendor
             vendor_counter += 1
 
         except Exception as e:

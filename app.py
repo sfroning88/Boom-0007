@@ -77,6 +77,9 @@ def UPLOAD_FILE():
                 case "journal":
                     from functions.journals import extract_journals
                     extracted = extract_journals(file, exte)
+                case "vendor":
+                    from functions.vendors import extract_vendors
+                    extracted = extract_vendors(file, exte)
                 case _:
                     pass
 

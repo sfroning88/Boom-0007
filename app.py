@@ -63,7 +63,6 @@ def UPLOAD_FILE():
         from functions.extension import ALLOWED_EXTENSIONS, retrieve_extension
         from functions.generate import generate_code
         from functions.classify import classify_file
-        from functions.process import process_file
         
         file = request.files.get('file')
         if not file:

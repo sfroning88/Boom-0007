@@ -80,14 +80,7 @@ def UPLOAD_FILE():
                 case _:
                     pass
 
-            print(f"File Code {code}")
-            first_transaction_key = list(extracted.keys())[0]
-            first_transaction = extracted[first_transaction_key]
-            print(f"Transaction Key: {first_transaction_key}")
-            print(f"Transaction Structure:")
-            for key, value in first_transaction.items():
-                print(f"  {key}: {value}")
-            
+            print(f"File Code {code} processed successfully.")
             files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
 
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200

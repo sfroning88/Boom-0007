@@ -67,7 +67,7 @@ def UPLOAD_FILE():
         file = request.files.get('file')
         if not file:
             return jsonify({'success': False, 'message': 'No file detected.'}), 400
-            
+        
         exte = retrieve_extension(file.filename)
         if exte in ALLOWED_EXTENSIONS:
             code = generate_code(file.filename)
@@ -76,15 +76,20 @@ def UPLOAD_FILE():
             match filetype:
                 case "journal":
                     from functions.journals import extract_journals
-                    extracted = extract_journals(file)
+                    extracted = extract_journals(file, exte)
                 case _:
                     pass
 
+            first_transaction_key = list(extracted.keys())[0]
+            first_transaction = extracted[first_transaction_key]
+            print(f"Transaction Key: {first_transaction_key}")
+            print(f"Transaction Structure:")
+            for key, value in first_transaction.items():
+                print(f"  {key}: {value}")
+            
             files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
-            for individual_file in files:
-                print(individual_file)
-                
-            return jsonify({'success': True, 'message': 'File upload success.'}), 200
+
+            return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid file extension.'}), 400
     

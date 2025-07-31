@@ -81,6 +81,9 @@ def UPLOAD_FILE():
                     pass
 
             files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
+            for individual_file in files:
+                print(individual_file)
+                
             return jsonify({'success': True, 'message': 'File upload success.'}), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid file extension.'}), 400

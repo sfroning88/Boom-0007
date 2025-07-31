@@ -114,5 +114,12 @@ def extract_journals(file, exte):
     # Handle the last transaction if it wasn't saved
     if current_transaction is not None:
         extracted[transaction_counter] = current_transaction
+
+    first_transaction_key = list(extracted.keys())[0]
+    first_transaction = extracted[first_transaction_key]
+    print(f"Transaction Key: {first_transaction_key}")
+    print(f"Transaction Structure:")
+    for key, value in first_transaction.items():
+        print(f"  {key}: {value}")
     
     return extracted

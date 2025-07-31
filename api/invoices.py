@@ -1,6 +1,6 @@
 def post_invoices(files):
-    # Hardcoded single transaction
     try:
+        # Hardcoded single transaction
         file_key = list(files.keys())[0]
         sample_file = files[file_key]
         sample_extraction = sample_file['df']

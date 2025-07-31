@@ -73,13 +73,12 @@ def UPLOAD_FILE():
             code = generate_code(file.filename)
             filetype = classify_file(file.filename)
 
-            if filetype == "journal":
-                from functions.process import process_journal
-                extracted = process_journal(file)
-            elif ftype == "vendors":
-                pass
-            elif type == "misc":
-                pass
+            match filetype:
+                case "journal":
+                    from functions.process import process_journal
+                    extracted = process_journal(file)
+                case _:
+                    pass
 
             files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
             return jsonify({'success': True, 'message': 'File upload success.'}), 200

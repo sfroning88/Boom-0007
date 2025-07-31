@@ -63,8 +63,8 @@
                       <div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">
                         <b>BOOM Assistant</b><br>
                         Welcome to BOOM Assistant! I can...<br><br>
-                        • Connect to Quickbooks Online<br>
-                        • Button Function 2<br>
+                        • Connect to QBO<br>
+                        • Upload a File<br>
                         • Button Function 3<br>
                         • Button Function 4<br>
                         • Button Function 5<br>
@@ -78,7 +78,7 @@
                   <div id="action-buttons" style="width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 0.5em; background: #23272f; border-radius: 16px; padding: 1em; justify-content: flex-end; margin-left: auto;">
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
                       <button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>
-                      <button id="BUTTON_FUNCTION_TWO" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Two</button>
+                      <button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>
                       <button id="BUTTON_FUNCTION_THREE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Three</button>
                       <button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>
                     </div>
@@ -109,10 +109,8 @@
         }, 100);
       }
 
-      $(document).ready(function () {
-        // Scroll to bottom on page load
-        scrollToBottom();
-        $('#CONNECT_QBO').on('click', function() {
+      function attachButtonHandlers() {
+        $('#CONNECT_QBO').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -143,7 +141,7 @@
           // Scroll to bottom
           scrollToBottom();
 
-          // BUTTON FUNCTION ONE
+          // CONNECT QBO
           $.ajax({
             url: '/CONNECT_QBO',
             type: 'POST',
@@ -164,16 +162,16 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_TWO').on('click', function() {
+        $('#UPLOAD_FILE').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
           // Show user message bubble
           $('#chat-messages').append(
             '<div class="d-flex mb-3 justify-content-end">' +
-              '<div class="p-3 rounded" style="background: #000000; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
+              '<div class="p-3 rounded" style="background: #90d382; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
                 '<span style="font-weight: bold;">You</span><br>' +
-                'Button Function Two' +
+                'Upload a File' +
               '</div>' +
               '<div class="img_cont_msg" style="margin-left: 12px;">' +
                 '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
@@ -181,38 +179,144 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response asking for file upload
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Loading button function two...</span>' +
+              '<b>BOOM Assistant</b><br>Please upload a file' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
 
+          // Replace action buttons with file upload form
+          $('#action-buttons').html(
+            '<form id="uploadForm" enctype="multipart/form-data" method="POST" action="/UPLOAD_FILE" style="width: 100%; max-width: 800px; display: flex; align-items: center; gap: 1em; background: #23272f; border-radius: 16px; padding: 1em; justify-content: flex-end; margin-left: auto;">' +
+              '<div class="form-group mb-0" style="flex: 1;">' +
+                '<input type="file" id="file" name="file" accept=".csv,.xls,.xlsx" class="form-control-file" required style="color: #fff;">' +
+              '</div>' +
+              '<button type="submit" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload</button>' +
+              '<div class="img_cont_msg" style="margin-left: 12px;">' +
+                '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+              '</div>' +
+            '</form>'
+          );
+
           // Scroll to bottom
           scrollToBottom();
 
-          // BUTTON FUNCTION TWO
-          $.ajax({
-            url: '/BUTTON_FUNCTION_TWO',
-            type: 'POST',
-            success: function (data) {
-              if (data.success) {
-                $('#' + currentChatId).html('<span style="color: limegreen;">Button Function Two success!</span>');
-              } else {
-                $('#' + currentChatId).html('<span style="color: red;">Button Function Two failure.</span>');
+          // Handle file upload form submission
+          $('#uploadForm').off('submit').on('submit', function (event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            var fileInput = $('#file')[0];
+            var fileName = fileInput.files.length ? fileInput.files[0].name : '';
+            if (!fileName) return;
+
+            // Show user message bubble with file name
+            $('#chat-messages').append(
+              '<div class="d-flex mb-3 justify-content-end">' +
+                '<div class="p-3 rounded" style="background: #90d382; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%; display: flex; flex-direction: column; align-items: flex-end;">' +
+                  '<span style="font-weight: bold; margin-bottom: 2px;">You</span>' +
+                  '<span style="display: flex; align-items: center;">' +
+                    '<i class="fas fa-paperclip" style="margin-right: 6px;"></i>Attached: ' + fileName +
+                  '</span>' +
+                '</div>' +
+                '<div class="img_cont_msg" style="margin-left: 12px;">' +
+                  '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+                '</div>' +
+              '</div>'
+            );
+
+            // Show bot "Uploading..." bubble
+            var uploadStatusId = 'upload-status-' + chatCounter;
+            var botBubble = $('<div class="d-flex mb-3">' +
+              '<div class="img_cont_msg" style="margin-right: 12px;">' +
+                '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+              '</div>' +
+              '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
+                '<b>BOOM Assistant</b><br><span id="' + uploadStatusId + '">File uploading...</span>' +
+              '</div>' +
+            '</div>');
+            $('#chat-messages').append(botBubble);
+
+            // Scroll to bottom
+            scrollToBottom();
+
+            $.ajax({
+              url: '/UPLOAD_FILE',
+              type: 'POST',
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (data) {
+                if (data.success) {
+                  $('#' + uploadStatusId).html('<span style="color: limegreen;">File upload successful!</span>');
+                  $('#file').val('');
+                } else {
+                  $('#' + uploadStatusId).html('<span style="color: red;">File upload failure: ' + (data.message || 'Unknown error') + '</span>');
+                }
+                
+                // Restore default 8-button layout
+                $('#action-buttons').html(
+                  '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
+                    '<button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>' +
+                    '<button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>' +
+                    '<button id="BUTTON_FUNCTION_THREE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Three</button>' +
+                    '<button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>' +
+                  '</div>' +
+                  '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
+                    '<button id="BUTTON_FUNCTION_FIVE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Five</button>' +
+                    '<button id="BUTTON_FUNCTION_SIX" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Six</button>' +
+                    '<button id="BUTTON_FUNCTION_SEVEN" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Seven</button>' +
+                    '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
+                    '<div class="img_cont_msg" style="margin-left: 12px;">' +
+                      '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+                    '</div>' +
+                  '</div>'
+                );
+                
+                // Re-attach event handlers for all buttons
+                attachButtonHandlers();
+              },
+              error: function () {
+                $('#' + uploadStatusId).html('<span style="color: red;">File upload failure.</span>');
+                
+                // Restore default 8-button layout
+                $('#action-buttons').html(
+                  '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
+                    '<button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>' +
+                    '<button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>' +
+                    '<button id="BUTTON_FUNCTION_THREE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Three</button>' +
+                    '<button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>' +
+                  '</div>' +
+                  '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
+                    '<button id="BUTTON_FUNCTION_FIVE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Five</button>' +
+                    '<button id="BUTTON_FUNCTION_SIX" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Six</button>' +
+                    '<button id="BUTTON_FUNCTION_SEVEN" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Seven</button>' +
+                    '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
+                    '<div class="img_cont_msg" style="margin-left: 12px;">' +
+                      '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+                    '</div>' +
+                  '</div>'
+                );
+                
+                // Re-attach event handlers for all buttons
+                attachButtonHandlers();
               }
-            },
-            error: function () {
-              $('#' + currentChatId).html('<span style="color: red;">Button Function Two error.</span>');
-            }
+            });
+
+            // Style file input text color
+            $('#file').on('change', function() {
+              if (this.files && this.files[0]) {
+                $(this).css('color', '#fff');
+              }
+            });
           });
         });
 
-        $('#BUTTON_FUNCTION_THREE').on('click', function() {
+        $('#BUTTON_FUNCTION_THREE').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -260,7 +364,7 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_FOUR').on('click', function() {
+        $('#BUTTON_FUNCTION_FOUR').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -308,7 +412,7 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_FIVE').on('click', function() {
+        $('#BUTTON_FUNCTION_FIVE').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -356,7 +460,7 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_SIX').on('click', function() {
+        $('#BUTTON_FUNCTION_SIX').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -404,7 +508,7 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_SEVEN').on('click', function() {
+        $('#BUTTON_FUNCTION_SEVEN').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -452,7 +556,7 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_EIGHT').on('click', function() {
+        $('#BUTTON_FUNCTION_EIGHT').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
@@ -499,6 +603,12 @@
             }
           });
         });
+      }
+
+      $(document).ready(function () {
+        // Scroll to bottom on page load
+        scrollToBottom();
+        attachButtonHandlers();
       });
     </script>
     <style>

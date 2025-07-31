@@ -56,7 +56,7 @@ def oauth_callback():
     except Exception as e:
         return render_template('oauth_error.html', message=str(e))
 
-# generic button function
+# uploading different financial files
 @app.route('/UPLOAD_FILE', methods=['POST'])
 def UPLOAD_FILE():
     try:

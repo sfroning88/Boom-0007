@@ -79,7 +79,7 @@
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
                       <button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>
                       <button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>
-                      <button id="BUTTON_FUNCTION_THREE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Three</button>
+                      <button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #e6134b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post some Bills</button>
                       <button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>
                     </div>
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
@@ -316,16 +316,16 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_THREE').off('click').on('click', function() {
+        $('#POST_BILLS').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
           // Show user message bubble
           $('#chat-messages').append(
             '<div class="d-flex mb-3 justify-content-end">' +
-              '<div class="p-3 rounded" style="background: #000000; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
+              '<div class="p-3 rounded" style="background: #e6134b; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
                 '<span style="font-weight: bold;">You</span><br>' +
-                'Button Function Three' +
+                'Post some Bills' +
               '</div>' +
               '<div class="img_cont_msg" style="margin-left: 12px;">' +
                 '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
@@ -339,7 +339,7 @@
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Loading button function three...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting bills...</span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -349,17 +349,17 @@
 
           // BUTTON FUNCTION THREE
           $.ajax({
-            url: '/BUTTON_FUNCTION_THREE',
+            url: '/POST_BILLS',
             type: 'POST',
             success: function (data) {
               if (data.success) {
-                $('#' + currentChatId).html('<span style="color: limegreen;">Button Function Three success!</span>');
+                $('#' + currentChatId).html('<span style="color: limegreen;">Bills Posted success!</span>');
               } else {
-                $('#' + currentChatId).html('<span style="color: red;">Button Function Three failure.</span>');
+                $('#' + currentChatId).html('<span style="color: red;">Bills Posted failure.</span>');
               }
             },
             error: function () {
-              $('#' + currentChatId).html('<span style="color: red;">Button Function Three error.</span>');
+              $('#' + currentChatId).html('<span style="color: red;">Bills Posted error.</span>');
             }
           });
         });

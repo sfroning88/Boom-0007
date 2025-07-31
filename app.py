@@ -75,8 +75,8 @@ def UPLOAD_FILE():
 
             match filetype:
                 case "journal":
-                    from functions.process import process_journal
-                    extracted = process_journal(file)
+                    from functions.journals import extract_journals
+                    extracted = extract_journals(file)
                 case _:
                     pass
 

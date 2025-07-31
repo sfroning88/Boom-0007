@@ -65,8 +65,8 @@
                         Welcome to BOOM Assistant! I can...<br><br>
                         • Connect to QBO<br>
                         • Upload a File<br>
+                        • Post all Customers<br>
                         • Post all Invoices 3<br>
-                        • Button Function 4<br>
                         • Button Function 5<br>
                         • Button Function 6<br>
                         • Button Function 7<br>
@@ -79,8 +79,8 @@
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
                       <button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>
                       <button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>
+                      <button id="POST_CUSTOMERS" class="btn btn-primary" style="margin: 0; background: #ccd60b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Customers</button>
                       <button id="POST_INVOICES" class="btn btn-primary" style="margin: 0; background: #e6134b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Invoices</button>
-                      <button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>
                     </div>
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
                       <button id="BUTTON_FUNCTION_FIVE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Five</button>
@@ -263,8 +263,8 @@
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>' +
                     '<button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>' +
+                    '<button id="POST_CUSTOMERS" class="btn btn-primary" style="margin: 0; background: #ccd60b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Customers</button>' +
                     '<button id="POST_INVOICES" class="btn btn-primary" style="margin: 0; background: #e6134b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Invoices</button>' +
-                    '<button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>' +
                   '</div>' +
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="BUTTON_FUNCTION_FIVE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Five</button>' +
@@ -288,8 +288,8 @@
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="CONNECT_QBO" class="btn btn-primary" style="margin: 0; background: #0000ff; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Connect to QBO</button>' +
                     '<button id="UPLOAD_FILE" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Upload a File</button>' +
+                    '<button id="POST_CUSTOMERS" class="btn btn-primary" style="margin: 0; background: #ccd60b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Customers</button>' +
                     '<button id="POST_INVOICES" class="btn btn-primary" style="margin: 0; background: #e6134b; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Invoices</button>' +
-                    '<button id="BUTTON_FUNCTION_FOUR" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Four</button>' +
                   '</div>' +
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="BUTTON_FUNCTION_FIVE" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Five</button>' +
@@ -313,6 +313,54 @@
                 $(this).css('color', '#fff');
               }
             });
+          });
+        });
+
+        $('#POST_CUSTOMERS').off('click').on('click', function() {
+          chatCounter++;
+          var currentChatId = 'call-status-' + chatCounter;
+          
+          // Show user message bubble
+          $('#chat-messages').append(
+            '<div class="d-flex mb-3 justify-content-end">' +
+              '<div class="p-3 rounded" style="background: #ccd60b; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
+                '<span style="font-weight: bold;">You</span><br>' +
+                'Post all Customers' +
+              '</div>' +
+              '<div class="img_cont_msg" style="margin-left: 12px;">' +
+                '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+              '</div>' +
+            '</div>'
+          );
+
+          // Show bot response
+          var botBubble = $('<div class="d-flex mb-3">' +
+            '<div class="img_cont_msg" style="margin-right: 12px;">' +
+              '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+            '</div>' +
+            '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting all customers...</span>' +
+            '</div>' +
+          '</div>');
+          $('#chat-messages').append(botBubble);
+
+          // Scroll to bottom
+          scrollToBottom();
+
+          // BUTTON FUNCTION FOUR
+          $.ajax({
+            url: '/POST_CUSTOMERS',
+            type: 'POST',
+            success: function (data) {
+              if (data.success) {
+                $('#' + currentChatId).html('<span style="color: limegreen;">Post Customers success!</span>');
+              } else {
+                $('#' + currentChatId).html('<span style="color: red;">Post Customers failure.</span>');
+              }
+            },
+            error: function () {
+              $('#' + currentChatId).html('<span style="color: red;">Post Customers error.</span>');
+            }
           });
         });
 
@@ -364,53 +412,6 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_FOUR').off('click').on('click', function() {
-          chatCounter++;
-          var currentChatId = 'call-status-' + chatCounter;
-          
-          // Show user message bubble
-          $('#chat-messages').append(
-            '<div class="d-flex mb-3 justify-content-end">' +
-              '<div class="p-3 rounded" style="background: #000000; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
-                '<span style="font-weight: bold;">You</span><br>' +
-                'Button Function Four' +
-              '</div>' +
-              '<div class="img_cont_msg" style="margin-left: 12px;">' +
-                '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
-              '</div>' +
-            '</div>'
-          );
-
-          // Show bot response
-          var botBubble = $('<div class="d-flex mb-3">' +
-            '<div class="img_cont_msg" style="margin-right: 12px;">' +
-              '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
-            '</div>' +
-            '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Loading button function four...</span>' +
-            '</div>' +
-          '</div>');
-          $('#chat-messages').append(botBubble);
-
-          // Scroll to bottom
-          scrollToBottom();
-
-          // BUTTON FUNCTION FOUR
-          $.ajax({
-            url: '/BUTTON_FUNCTION_FOUR',
-            type: 'POST',
-            success: function (data) {
-              if (data.success) {
-                $('#' + currentChatId).html('<span style="color: limegreen;">Button Function Four success!</span>');
-              } else {
-                $('#' + currentChatId).html('<span style="color: red;">Button Function Four failure.</span>');
-              }
-            },
-            error: function () {
-              $('#' + currentChatId).html('<span style="color: red;">Button Function Four error.</span>');
-            }
-          });
-        });
 
         $('#BUTTON_FUNCTION_FIVE').off('click').on('click', function() {
           chatCounter++;

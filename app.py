@@ -62,6 +62,8 @@ def UPLOAD_FILE():
     try:
         from functions.extension import ALLOWED_EXTENSIONS, retrieve_extension
         from functions.generate import generate_code
+        from functions.classify import classify_file
+        from functions.process import process_file
         
         file = request.files.get('file')
         if not file:
@@ -70,7 +72,17 @@ def UPLOAD_FILE():
         exte = retrieve_extension(file.filename)
         if exte in ALLOWED_EXTENSIONS:
             code = generate_code(file.filename)
-            files[code] = {'name': file.filename, 'df': ""}
+            filetype = classify_file(file.filename)
+
+            if filetype == "journal":
+                from functions.process import process_journal
+                extracted = process_journal(file)
+            elif ftype == "vendors":
+                pass
+            elif type == "misc":
+                pass
+
+            files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
             return jsonify({'success': True, 'message': 'File upload success.'}), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid file extension.'}), 400

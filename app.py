@@ -86,7 +86,7 @@ def UPLOAD_FILE():
                 case _:
                     pass
 
-            print(f"File Code {code} processed successfully.")
+            print(f"\nFile Code {code} processed successfully.\n")
             files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
 
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200

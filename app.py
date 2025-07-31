@@ -56,7 +56,7 @@ def oauth_callback():
     except Exception as e:
         return render_template('oauth_error.html', message=str(e))
 
-# uploading different financial files
+# uploading different QBD files
 @app.route('/UPLOAD_FILE', methods=['POST'])
 def UPLOAD_FILE():
     try:
@@ -96,6 +96,22 @@ def UPLOAD_FILE():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
+# send customers over to QBO
+@app.route('/POST_CUSTOMERS', methods=['POST'])
+def POST_CUSTOMERS():
+    try:
+        from api.customers import post_customers
+        result = post_customers(files)
+
+        if result:
+            return jsonify({'success': True, 'message': 'Posting Customers success.'}), 200
+
+        return jsonify({'success': False, 'message': 'Posting Customers failure.'}), 400
+    
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+# send invoices over to QBO
 @app.route('/POST_INVOICES', methods=['POST'])
 def POST_INVOICES():
     try:
@@ -106,14 +122,6 @@ def POST_INVOICES():
             return jsonify({'success': True, 'message': 'Posting Invoices success.'}), 200
         
         return jsonify({'success': False, 'message': 'Posting Invoices failed.'}), 400
-    
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 400
-
-@app.route('/BUTTON_FUNCTION_FOUR', methods=['POST'])
-def BUTTON_FUNCTION_FOUR():
-    try:
-        return jsonify({'success': True, 'message': 'Button Function Four success.'}), 200
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

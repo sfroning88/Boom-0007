@@ -24,12 +24,11 @@ def extract_customers(file, exte):
         try:
             current_customer = {
                 'Customer': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
-                'Account #': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
-                'Bill From': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
-                'Primary Contact': str(row.iloc[8]) if pd.notna(row.iloc[8]) else None,
-                'Main Phone': str(row.iloc[10]) if pd.notna(row.iloc[10]) else None,
-                'Fax': str(row.iloc[12]) if pd.notna(row.iloc[12]) else None,
-                'Balance Total': round(float(row.iloc[14]), 2) if pd.notna(row.iloc[14]) else None
+                'Bill To': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
+                'Primary Contact': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
+                'Main Phone': str(row.iloc[8]) if pd.notna(row.iloc[8]) else None,
+                'Fax': str(row.iloc[10]) if pd.notna(row.iloc[10]) else None,
+                'Balance Total': round(float(row.iloc[12]), 2) if pd.notna(row.iloc[12]) else None
             }
 
             extracted[customer_counter] = current_customer

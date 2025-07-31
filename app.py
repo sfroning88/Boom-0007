@@ -11,6 +11,9 @@ qbo_token = os.environ.get('QBO_API_KEY')
 # get Quickbooks Online account
 qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
 
+# # dictionary for uploaded files
+files = {}
+
 @app.route('/')
 def home():
     return render_template('chat.html')
@@ -54,10 +57,23 @@ def oauth_callback():
         return render_template('oauth_error.html', message=str(e))
 
 # generic button function
-@app.route('/BUTTON_FUNCTION_TWO', methods=['POST'])
-def BUTTON_FUNCTION_TWO():
+@app.route('/UPLOAD_FILE', methods=['POST'])
+def UPLOAD_FILE():
     try:
-        return jsonify({'success': True, 'message': 'Button Function Two success.'}), 200
+        from functions.extension import ALLOWED_EXTENSIONS, retrieve_extension
+        from functions.generate import generate_code
+        
+        file = request.files.get('file')
+        if not file:
+            return jsonify({'success': False, 'message': 'No file detected.'}), 400
+            
+        exte = retrieve_extension(file.filename)
+        if exte in ALLOWED_EXTENSIONS:
+            code = generate_code(file.filename)
+            files[code] = {'name': file.filename, 'df': ""}
+            return jsonify({'success': True, 'message': 'File upload success.'}), 200
+        else:
+            return jsonify({'success': False, 'message': 'Invalid file extension.'}), 400
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

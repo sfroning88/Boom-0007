@@ -87,7 +87,7 @@ def UPLOAD_FILE():
                     pass
 
             print(f"\nFile Code {code} processed successfully.\n")
-            files[code] = {'name': file.filename, 'type': filetype, 'df': extracted}
+            files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
 
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
         else:
@@ -96,7 +96,7 @@ def UPLOAD_FILE():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-# send customers over to QBO
+# send customers over to QBD
 @app.route('/POST_CUSTOMERS', methods=['POST'])
 def POST_CUSTOMERS():
     try:

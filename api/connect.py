@@ -16,7 +16,7 @@ def get_oauth_url(qbo_token, qbo_account):
         return None
 
 def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
-    import requests
+    import requests, os
     from intuitlib.client import AuthClient
 
     try:
@@ -29,9 +29,19 @@ def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
             auth_client.get_bearer_token(auth_code, realm_id=realm_id)
             print("\nBearer token and refresh token obtained successfully\n")
             
-            # Store refresh token for future use (in production, encrypt this)
+            # Store tokens for future use (in production, encrypt this)
+            access_token = auth_client.access_token
             refresh_token = auth_client.refresh_token
-            print(f"\nRefresh token stored: {refresh_token[:20]}...\n")
+            realm_id = auth_client.realm_id
+            
+            # Store in environment variables for API calls
+            os.environ['QBO_ACCESS_TOKEN'] = access_token
+            os.environ['QBO_REFRESH_TOKEN'] = refresh_token
+            os.environ['QBO_REALM_ID'] = realm_id
+            
+            print(f"\nAccess token stored: {access_token[:20]}...")
+            print(f"Refresh token stored: {refresh_token[:20]}...")
+            print(f"Realm ID stored: {realm_id}\n")
             
             # Test the connection by fetching company info
             base_url = 'https://sandbox-quickbooks.api.intuit.com'

@@ -10,7 +10,7 @@ def post_customers(files):
                 break
 
         if customer_file_key is None:
-            print("Missing customer file. Please upload file first.")
+            print("\nMissing customer file. Please upload file first.\n")
             return False
 
         customer_file = files[customer_file_key]

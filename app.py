@@ -1,5 +1,5 @@
 import os, sys
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, jsonify, request
 
 # create a Flask app
 app = Flask(__name__)
@@ -11,7 +11,7 @@ qbo_token = os.environ.get('QBO_API_KEY')
 # get Quickbooks Online account
 qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
 
-# # dictionary for uploaded files
+# dictionary for uploaded files
 files = {}
 
 @app.route('/')
@@ -49,7 +49,7 @@ def oauth_callback():
         
         if success:
             # Show success page that will update the main app
-            return render_template('oauth_success.html', message='QBO connection established successfully! Refresh token stored for future use.')
+            return render_template('oauth_success.html', message='QBO connection established successfully!')
         else:
             return render_template('oauth_error.html', message='Failed to establish QBO connection')
             
@@ -86,7 +86,7 @@ def UPLOAD_FILE():
                 case _:
                     pass
 
-            print(f"\nFile Code {code} processed successfully.\n")
+            print(f"File Code {code} processed successfully.")
             files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
 
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
@@ -111,7 +111,7 @@ def POST_CUSTOMERS():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-# send invoices over to QBO
+# send invoices over to QBD
 @app.route('/POST_INVOICES', methods=['POST'])
 def POST_INVOICES():
     try:
@@ -126,18 +126,30 @@ def POST_INVOICES():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-@app.route('/BUTTON_FUNCTION_FIVE', methods=['POST'])
-def BUTTON_FUNCTION_FIVE():
+@app.route('/POST_VENDORS', methods=['POST'])
+def POST_VENDORS():
     try:
-        return jsonify({'success': True, 'message': 'Button Function Five success.'}), 200
+        from api.vendors import post_vendors
+        result = post_vendors(files)
+
+        if result:
+            return jsonify({'success': True, 'message': 'Posting Vendors success.'}), 200
+
+        return jsonify({'success': False, 'message': 'Posting Vendors failure.'}), 400
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
-@app.route('/BUTTON_FUNCTION_SIX', methods=['POST'])
-def BUTTON_FUNCTION_SIX():
+@app.route('/POST_BILLS', methods=['POST'])
+def POST_BILLS():
     try:
-        return jsonify({'success': True, 'message': 'Button Function Six success.'}), 200
+        from api.bills import post_bills
+        result = post_bills(files)
+
+        if result:
+            return jsonify({'success': True, 'message': 'Posting Bills success.'}), 200
+        
+        return jsonify({'success': False, 'message': 'Posting Bills failed.'}), 400
     
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

@@ -1,4 +1,6 @@
 def extract_vendors(file, exte):
+    print("##############################_EXTRV_BEGIN_##############################")
+
     # Generic dictionary to store vendors
     extracted = {}
 
@@ -9,21 +11,23 @@ def extract_vendors(file, exte):
     elif exte == 'xlsx' or exte == 'xls':
         df = pd.read_excel(file)
     else:
+        print("##############################_EXTRV_END_##############################")
         return {}
     
     num_rows, num_cols = df.shape
 
-    print(f"\n{num_rows} Rows, {num_cols} Cols were ingested\n")
+    print(f"{num_rows} Rows, {num_cols} Cols were ingested")
 
     # Extract vendors
     vendor_counter = 0
 
+    from functions.stripping import strip_nonabc
     for i in range(len(df)):
         row = df.iloc[i]
         
         try:
             current_vendor = {
-                'Vendor': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
+                'Vendor': strip_nonabc(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
                 'Account #': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
                 'Bill From': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
                 'Primary Contact': str(row.iloc[8]) if pd.notna(row.iloc[8]) else None,
@@ -45,4 +49,5 @@ def extract_vendors(file, exte):
     for key, value in first_vendor.items():
         print(f"  {key}: {value}")
 
+    print("##############################_EXTRV_END_##############################")
     return extracted

@@ -1,4 +1,6 @@
 def get_oauth_url(qbo_token, qbo_account):
+    print("##############################_OAUTH_BEGIN_##############################")
+    
     from intuitlib.client import AuthClient
     from intuitlib.enums import Scopes
 
@@ -8,14 +10,18 @@ def get_oauth_url(qbo_token, qbo_account):
         auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment="sandbox")
         url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
         
-        print(f"\nOAuth URL generated: {url}\n")
+        print(f"OAuth URL generated: {url}")
+        print("##############################_OAUTH_END_##############################")  
         return url
 
     except Exception as e:
         print(e)
+        print("##############################_OAUTH_END_##############################")
         return None
 
 def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
+    print("##############################_QBO_BEGIN_##############################")
+    
     import requests, os
     from intuitlib.client import AuthClient
 
@@ -27,7 +33,7 @@ def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
         if auth_code and realm_id:
             # Exchange auth code for bearer token and refresh token
             auth_client.get_bearer_token(auth_code, realm_id=realm_id)
-            print("\nBearer token and refresh token obtained successfully\n")
+            print("Bearer token and refresh token obtained successfully")
             
             # Store tokens for future use (in production, encrypt this)
             access_token = auth_client.access_token
@@ -39,9 +45,9 @@ def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
             os.environ['QBO_REFRESH_TOKEN'] = refresh_token
             os.environ['QBO_REALM_ID'] = realm_id
             
-            print(f"\nAccess token stored: {access_token[:20]}...")
+            print(f"Access token stored: {access_token[:20]}...")
             print(f"Refresh token stored: {refresh_token[:20]}...")
-            print(f"Realm ID stored: {realm_id}\n")
+            print(f"Realm ID stored: {realm_id}")
             
             # Test the connection by fetching company info
             base_url = 'https://sandbox-quickbooks.api.intuit.com'
@@ -54,15 +60,19 @@ def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
             response = requests.get(url, headers=headers)
             
             if response.status_code == 200 or response.status_code == 201:
-                print("\nQBO connection verified successfully\n")
+                print("QBO connection verified successfully")
+                print("##############################_QBO_END_##############################")
                 return True
             else:
                 print(response.status_code, response.text)
+                print("##############################_QBO_END_##############################")
                 return False
         else:
-            print("\nMissing auth_code or realm_id\n")
+            print("Missing auth_code or realm_id")
+            print("##############################_QBO_END_##############################")
             return False
 
     except Exception as e:
         print(e)
+        print("##############################_QBO_END_##############################")
         return False

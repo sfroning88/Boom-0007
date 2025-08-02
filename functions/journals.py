@@ -13,6 +13,8 @@ def is_last_row(row, next_row=None):
     return False
 
 def extract_journals(file, exte):
+    print("##############################_EXTRJ_BEGIN_##############################")
+
     # Generic dictionary to store transactions
     extracted = {}
 
@@ -23,16 +25,18 @@ def extract_journals(file, exte):
     elif exte == 'xlsx' or exte == 'xls':
         df = pd.read_excel(file)
     else:
+        print("##############################_EXTRJ_END_##############################")
         return {}
     
     num_rows, num_cols = df.shape
 
-    print(f"\n{num_rows} Rows, {num_cols} Cols were ingested\n")
+    print(f"{num_rows} Rows, {num_cols} Cols were ingested")
 
     # Extract transactions
     transaction_counter = 0
     current_transaction = None
     
+    from functions.stripping import strip_nonabc
     for i in range(len(df)):
         row = df.iloc[i]
         next_row = df.iloc[i + 1] if i + 1 < len(df) else None
@@ -48,13 +52,13 @@ def extract_journals(file, exte):
             from functions.extension import strip_timestamp
             try:
                 current_transaction = {
-                    'Trans #': str(row.iloc[1]) if pd.notna(row.iloc[1]) else None,
-                    'Type': str(row.iloc[3]) if pd.notna(row.iloc[3]) else None,
+                    'Trans #': str(int(row.iloc[1])).strip() if pd.notna(row.iloc[1]) else None,
+                    'Type': str(row.iloc[3]).strip() if pd.notna(row.iloc[3]) else None,
                     'Date': strip_timestamp(str(row.iloc[5])) if pd.notna(row.iloc[5]) else None,
-                    'Num': str(row.iloc[7]) if pd.notna(row.iloc[7]) else None,
-                    'Name': [],
-                    'Memo': [],
-                    'Account': [],
+                    'Num': str(row.iloc[7]).strip() if pd.notna(row.iloc[7]) else None,
+                    'Name': strip_nonabc(str(row.iloc[9])) if pd.notna(row.iloc[9]) else None,
+                    'Memo': str(row.iloc[11]).strip() if pd.notna(row.iloc[11]) else None,
+                    'Account': str(row.iloc[13]).strip() if pd.notna(row.iloc[13]) else None,
                     'Debit': [],
                     'Credit': []
                 }
@@ -65,19 +69,6 @@ def extract_journals(file, exte):
         # Add data to current transaction
         if current_transaction is not None:
             try:
-                # Add Name (column J, index 9)
-                if pd.notna(row.iloc[9]) and str(row.iloc[9]).strip() != "":
-                    current_transaction['Name'].append(str(row.iloc[9]))
-            
-                # Add Memo (column L, index 11)
-                if pd.notna(row.iloc[11]) and str(row.iloc[11]).strip() != "":
-                    current_transaction['Memo'].append(str(row.iloc[11]))
-            
-                # Add Account (column N, index 13)
-                if pd.notna(row.iloc[13]) and str(row.iloc[13]).strip() != "":
-                    current_transaction['Account'].append(str(row.iloc[13]))
-            
-
                 # Add Debit (column P, index 15) - use 0 for empty cells
                 if pd.notna(row.iloc[15]) and str(row.iloc[15]).strip() != "":
                     # Convert numpy.float64 to regular float and format to 2 decimal places
@@ -114,12 +105,13 @@ def extract_journals(file, exte):
     # Handle the last transaction if it wasn't saved
     if current_transaction is not None:
         extracted[transaction_counter] = current_transaction
-
+    
     first_transaction_key = list(extracted.keys())[0]
     first_transaction = extracted[first_transaction_key]
     print(f"Transaction Key: {first_transaction_key}")
     print(f"Transaction Structure:")
     for key, value in first_transaction.items():
         print(f"  {key}: {value}")
-    
+
+    print("##############################_EXTRJ_END_##############################")
     return extracted

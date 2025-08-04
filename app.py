@@ -106,6 +106,7 @@ def POST_INVOICES():
         
     return jsonify({'success': False, 'message': 'Posting Invoices failed.'}), 400
 
+# send vendors over to QBD
 @app.route('/POST_VENDORS', methods=['POST'])
 def POST_VENDORS():
     from api.vendors import post_vendors
@@ -116,6 +117,7 @@ def POST_VENDORS():
 
     return jsonify({'success': False, 'message': 'Posting Vendors failure.'}), 400
 
+# send bills over to QBD
 @app.route('/POST_BILLS', methods=['POST'])
 def POST_BILLS():
     from api.bills import post_bills

@@ -13,7 +13,7 @@ def post_invoices(files):
             break
 
     if journal_file_key is None:
-        print("Missing journal file. Please upload file first.")
+        print("WARNING: Missing journal file. Please upload file first.")
         return False
 
     journal_file = files[journal_file_key]
@@ -28,7 +28,7 @@ def post_invoices(files):
         if not is_invoice:
             invoice_extraction.pop(key)
 
-    print(f"Found {len(list(invoice_extraction.keys()))} invoices to post.")
+    print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post.")
 
     # Clean customer names to best match
     from api.resolve import resolve_customers
@@ -59,7 +59,11 @@ def single_invoice(one_invoice):
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
+        return False
+
+    if one_invoice['Id'] is None:
+        print(f"WARNING: Could not post invoice for {one_invoice['Name']}")
         return False
             
     # Extract invoice data
@@ -82,7 +86,7 @@ def single_invoice(one_invoice):
         
     # Add optional fields if available
     if invoice_date:
-        invoice["Date"] = invoice_date
+        invoice["DueDate"] = invoice_date
         
     if invoice_number:
         invoice["DocNumber"] = invoice_number
@@ -103,8 +107,8 @@ def single_invoice(one_invoice):
     response = requests.post(url, json=invoice, headers=headers)
         
     if response.status_code >= 300:
-        print(f"Failed to create invoice for {one_invoice['Name']} because {response.message}")
+        print(f"ERROR: Failed to create invoice for {one_invoice['Name']}")
         return False
         
-    print(f"Posting invoice for {one_invoice['Name']}, Amount: ${amount}")
+    #print(f"INVOICE: Posting invoice for {one_invoice['Name']}, Amount: ${amount}")
     return True

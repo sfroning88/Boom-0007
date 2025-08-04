@@ -6,7 +6,7 @@ def get_customers():
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
         return None
         
     # QBO API endpoint for querying customers
@@ -21,7 +21,7 @@ def get_customers():
     response = requests.get(url, headers=headers)
         
     if response.status_code >= 300:
-        print(f"Failed to retrieve customers: {response.text}")
+        print(f"ERORR: Failed to retrieve customers from QBO")
         return None
 
     customers_data = response.json()
@@ -29,7 +29,7 @@ def get_customers():
         customers = customers_data['QueryResponse']
         return customers
     else:
-        print("No customers found in QBO database.")
+        print("WARNING: No customers found in QBO database.")
         return {}
 
 def get_vendors():
@@ -40,7 +40,7 @@ def get_vendors():
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
         return None
         
     # QBO API endpoint for querying customers
@@ -55,7 +55,7 @@ def get_vendors():
     response = requests.get(url, headers=headers)
         
     if response.status_code >= 300:
-        print(f"Failed to retrieve vendors: {response.text}")
+        print(f"ERROR: Failed to retrieve vendors from QBO")
         return None
 
     vendors_data = response.json()
@@ -63,7 +63,7 @@ def get_vendors():
         vendors = vendors_data['QueryResponse']
         return vendors
     else:
-        print("No vendors found in QBO database.")
+        print("WARNING: No vendors found in QBO database.")
         return {}
 
 def get_expenses():
@@ -74,7 +74,7 @@ def get_expenses():
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
         return None
         
     # QBO API endpoint for querying accounts
@@ -89,7 +89,7 @@ def get_expenses():
     response = requests.get(url, headers=headers)
         
     if response.status_code >= 300:
-        print(f"Failed to retrieve expense account: {response.text}")
+        print(f"ERROR: Failed to retrieve expense account from QBO")
         return None
     
     accounts_data = response.json()
@@ -100,5 +100,5 @@ def get_expenses():
                 if account_object['Name'] ==  "Uncategorized Expense":
                     return account_object['Id']
     else:
-            print("No accounts payable found in QBO database.")
+            print("WARNING: No expense accounts found in QBO database.")
             return None

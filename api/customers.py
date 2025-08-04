@@ -19,7 +19,7 @@ def post_customers(files):
     customer_extraction = customer_file['df']
 
     # Concurrently post all customers from customers
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(customer_threadsafe, list(customer_extraction.values())), total=len(list(customer_extraction.keys()))))
 
     print("##############################_POSTC_END_##############################")
@@ -29,7 +29,10 @@ def customer_threadsafe(one_customer):
     single_customer(one_customer)
 
 def single_customer(one_customer):
-    import os, requests
+    import os, requests, time, random
+
+    # Respectful delay to the server
+    time.sleep(random.uniform(0.3, 0.8))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -89,37 +92,3 @@ def single_customer(one_customer):
         return False
         
     return True
-
-def get_customers():
-    import os, requests
-        
-    # Get OAuth tokens from environment
-    access_token = os.environ.get('QBO_ACCESS_TOKEN')
-    realm_id = os.environ.get('QBO_REALM_ID')
-        
-    if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
-        return None
-        
-    # QBO API endpoint for querying customers
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
-    url = f'{base_url}/v3/company/{realm_id}/query?query=select DisplayName, Id FROM Customer MAXRESULTS 1000&minorversion=75'
-        
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Accept': 'application/json'
-    }
-        
-    response = requests.get(url, headers=headers)
-        
-    if response.status_code < 300:
-        customers_data = response.json()
-        if 'QueryResponse' in customers_data and 'Customer' in customers_data['QueryResponse']:
-            customers = customers_data['QueryResponse']
-            return customers
-        else:
-            print("No customers found in QBO database.")
-            return {}
-    else:
-        print(f"Failed to retrieve customers: {response.text}")
-        return None

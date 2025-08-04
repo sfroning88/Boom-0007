@@ -24,8 +24,9 @@ def post_invoices(files):
     invoice_extraction = journal_extraction.copy()
     for key in list(invoice_extraction.keys()):
         transaction_type = invoice_extraction[key]['Type']
-        is_invoice = any(re.search(pattern, transaction_type, re.IGNORECASE) for pattern in invoice_patterns)
-        if not is_invoice:
+        if transaction_type.lower() == "invoice":
+            continue
+        else:
             invoice_extraction.pop(key)
 
     print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post.")

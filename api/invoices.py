@@ -1,6 +1,7 @@
 def post_invoices(files):
     print("##############################_POSTI_BEGIN_##############################")
 
+    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -19,7 +20,6 @@ def post_invoices(files):
     journal_extraction = journal_file['df']
 
     # Remove any non invoice transactions
-    import re
     from support.linetypes import invoice_patterns
     invoice_extraction = journal_extraction.copy()
     for key in list(invoice_extraction.keys()):
@@ -31,11 +31,15 @@ def post_invoices(files):
     print(f"Found {len(list(invoice_extraction.keys()))} invoices to post.")
 
     # Clean customer names to best match
-    from api.customers import clean_customers
-    invoice_extraction = clean_customers(invoice_extraction)
+    from api.resolve import resolve_customers
+    invoice_extraction = resolve_customers(invoice_extraction)
 
+    # Assign ids pulled from QBO
+    from api.resolve import resolve_cust_ids
+    invoice_extraction = resolve_cust_ids(invoice_extraction)
+    
     # Concurrently post all invoices
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(invoice_threadsafe, list(invoice_extraction.values())), total=len(list(invoice_extraction.keys()))))
     
     print("##############################_POSTI_END_##############################")
@@ -46,7 +50,6 @@ def invoice_threadsafe(one_invoice):
 
 def single_invoice(one_invoice):
     import os, requests
-    from api.customers import get_customers
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -60,7 +63,7 @@ def single_invoice(one_invoice):
     invoice_date = one_invoice['Date']
     invoice_number = one_invoice['Num']
     memo = one_invoice['Memo']
-    amount = one_invoice['Debit'][0]
+    amount = one_invoice['Debit']
         
     # Create invoice object according to QBO API specification
     invoice = {
@@ -101,5 +104,4 @@ def single_invoice(one_invoice):
         return False
         
     print(f"Posting invoice for {one_invoice['Name']}, Amount: ${amount}")
-
     return True

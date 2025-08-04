@@ -31,22 +31,31 @@ def post_bills(files):
     print(f"Found {len(list(bill_extraction.keys()))} bills to post.")
 
     # Clean vendor names to best match
-    from api.vendors import clean_vendors
-    bill_extraction = clean_vendors(bill_extraction)
+    from api.resolve import resolve_vendors
+    bill_extraction = resolve_vendors(bill_extraction)
+
+    # Assign ids pulled from QBO
+    from api.resolve import resolve_vend_ids
+    try:
+        bill_extraction = resolve_vend_ids(bill_extraction)
+    except Exception as e:
+        print(e)
 
     # Concurrently post all bills
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(bill_threadsafe, list(bill_extraction.values())), total=len(list(bill_extraction.keys()))))
     
     print("##############################_POSTB_END_##############################")
     return True
 
 def bill_threadsafe(one_bill):
-    single_bill(one_bill)
+    try:
+        single_bill(one_bill)
+    except Exception as e:
+        print(e)
 
 def single_bill(one_bill):
     import os, requests
-    from api.vendors import get_vendors
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -60,7 +69,7 @@ def single_bill(one_bill):
     bill_date = one_bill['Date']
     bill_number = one_bill['Num']
     memo = one_bill['Memo']
-    amount = one_bill['Credit'][1]
+    amount = one_bill['Credit']
         
     # Create bill object according to QBO API specification
     bill = {
@@ -68,9 +77,14 @@ def single_bill(one_bill):
             "value": one_bill['Id']
         },
         "Line": [{
-            "DetailType": "DescriptionOnly",
+            "DetailType": "AccountBasedExpenseLineDetail",
             "Amount": amount,
-            "Description": memo if memo else "Bill line item"
+            "Id": "1", 
+            "AccountBasedExpenseLineDetail": {
+                "AccountRef": {
+                "value": "1"
+                }
+            }
         }]
     }
         
@@ -101,5 +115,4 @@ def single_bill(one_bill):
         return False
         
     print(f"Posting bill for {one_bill['Name']}, Amount: ${amount}")
-
     return True

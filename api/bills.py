@@ -13,7 +13,7 @@ def post_bills(files):
             break
 
     if journal_file_key is None:
-        print("Missing journal file. Please upload file first.")
+        print("WARNING: Missing journal file. Please upload file first.")
         return False
 
     journal_file = files[journal_file_key]
@@ -34,7 +34,7 @@ def post_bills(files):
         else:
             bill_extraction.pop(key)
 
-    print(f"Found {len(list(bill_extraction.keys()))} bills to post.")
+    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post.")
 
     # Clean vendor names to best match
     from api.resolve import resolve_vendors
@@ -65,7 +65,11 @@ def single_bill(one_bill):
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
+        return False
+
+    if one_bill['Id'] is None:
+        print(f"WARNING: Could not post bill for {one_bill['Name']}")
         return False
             
     # Extract bill data
@@ -115,8 +119,8 @@ def single_bill(one_bill):
     response = requests.post(url, json=bill, headers=headers)
         
     if response.status_code >= 300:
-        print(f"Failed to create bill for {one_bill['Name']} because {response.text}")
+        print(f"ERROR: Failed to create bill for {one_bill['Name']}")
         return False
         
-    print(f"Posting bill for {one_bill['Name']}, Amount: ${amount}")
+    #print(f"BILL: Posting bill for {one_bill['Name']}, Amount: ${amount}")
     return True

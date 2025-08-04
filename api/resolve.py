@@ -3,7 +3,7 @@ def resolve_customers(invoices_extracted):
     import concurrent.futures
     from tqdm import tqdm
 
-    from api.customers import get_customers
+    from api.retrieve import get_customers
     customers_pre = get_customers()
     customers_post = customers_pre['Customer']
 
@@ -74,7 +74,7 @@ def resolve_customers(invoices_extracted):
     return invoices_extracted
 
 def resolve_cust_ids(invoices_extracted):
-    from api.customers import get_customers
+    from api.retrieve import get_customers
     customers_pre = get_customers()
     customers_post = customers_pre['Customer']
 
@@ -101,7 +101,7 @@ def resolve_vendors(bills_extracted):
     import concurrent.futures
     from tqdm import tqdm
 
-    from api.vendors import get_vendors
+    from api.retrieve import get_vendors
     vendors_pre = get_vendors()
     vendors_post = vendors_pre['Vendor']
 
@@ -154,7 +154,7 @@ def resolve_vendors(bills_extracted):
     vendors_added = []
     for bill_name in vendors_new:
         # Create dummy vendor object and add to database
-        dummy_bill = {
+        dummy_vendor = {
             'Vendor': bill_name,
             'Bill To': '',
             'Primary Contact': '',
@@ -162,17 +162,17 @@ def resolve_vendors(bills_extracted):
             'Fax': '',
             'Balance Total': 0.0
         }
-        vendors_added.append(dummy_bill)
+        vendors_added.append(dummy_vendor)
 
     # Concurrently post all customers from customers
     from api.vendors import vendor_threadsafe
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(vendor_threadsafe, vendors_added), total=len(vendors_added)))
 
     return bills_extracted
 
 def resolve_vend_ids(bills_extracted):
-    from api.vendors import get_vendors
+    from api.retrieve import get_vendors
     vendors_pre = get_vendors()
     vendors_post = vendors_pre['Vendor']
 

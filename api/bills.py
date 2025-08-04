@@ -28,8 +28,7 @@ def post_bills(files):
     bill_extraction = journal_extraction.copy()
     for key in list(bill_extraction.keys()):
         transaction_type = bill_extraction[key]['Type']
-        is_bill = any(re.search(pattern, transaction_type, re.IGNORECASE) for pattern in bill_patterns)
-        if is_bill:
+        if transaction_type.lower() == "bill":
             bill_extraction[key]['Exp_Id'] = exp_id
         else:
             bill_extraction.pop(key)

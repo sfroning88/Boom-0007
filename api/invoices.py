@@ -49,7 +49,10 @@ def invoice_threadsafe(one_invoice):
     single_invoice(one_invoice)
 
 def single_invoice(one_invoice):
-    import os, requests
+    import os, requests, time, random
+
+    # Respectful delay to the server
+    time.sleep(random.uniform(0.3, 0.8))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -79,7 +82,7 @@ def single_invoice(one_invoice):
         
     # Add optional fields if available
     if invoice_date:
-        invoice["TxnDate"] = invoice_date
+        invoice["Date"] = invoice_date
         
     if invoice_number:
         invoice["DocNumber"] = invoice_number

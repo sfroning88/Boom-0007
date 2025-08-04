@@ -1,6 +1,7 @@
 def post_bills(files):
     print("##############################_POSTB_BEGIN_##############################")
 
+    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -18,14 +19,19 @@ def post_bills(files):
     journal_file = files[journal_file_key]
     journal_extraction = journal_file['df']
 
-    # Remove any non bill transactions
-    import re
+    # Collect the accounts payable Id
+    from api.retrieve import get_expenses
+    exp_id = get_expenses()
+
+    # Remove any non bill transactions 
     from support.linetypes import bill_patterns
     bill_extraction = journal_extraction.copy()
     for key in list(bill_extraction.keys()):
         transaction_type = bill_extraction[key]['Type']
         is_bill = any(re.search(pattern, transaction_type, re.IGNORECASE) for pattern in bill_patterns)
-        if not is_bill:
+        if is_bill:
+            bill_extraction[key]['Exp_Id'] = exp_id
+        else:
             bill_extraction.pop(key)
 
     print(f"Found {len(list(bill_extraction.keys()))} bills to post.")
@@ -36,10 +42,7 @@ def post_bills(files):
 
     # Assign ids pulled from QBO
     from api.resolve import resolve_vend_ids
-    try:
-        bill_extraction = resolve_vend_ids(bill_extraction)
-    except Exception as e:
-        print(e)
+    bill_extraction = resolve_vend_ids(bill_extraction)
 
     # Concurrently post all bills
     with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
@@ -49,13 +52,13 @@ def post_bills(files):
     return True
 
 def bill_threadsafe(one_bill):
-    try:
-        single_bill(one_bill)
-    except Exception as e:
-        print(e)
+    single_bill(one_bill)
 
 def single_bill(one_bill):
-    import os, requests
+    import os, requests, time, random
+
+    # Respectful delay to the server
+    time.sleep(random.uniform(0.3, 0.8))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -79,18 +82,19 @@ def single_bill(one_bill):
         "Line": [{
             "DetailType": "AccountBasedExpenseLineDetail",
             "Amount": amount,
-            "Id": "1", 
             "AccountBasedExpenseLineDetail": {
                 "AccountRef": {
-                "value": "1"
+                "value": one_bill['Exp_Id'],
+                "name": "Uncategorized Expense"
                 }
-            }
+            },
+            "Description": memo if memo else "Bill line item"
         }]
     }
         
     # Add optional fields if available
     if bill_date:
-        bill["TxnDate"] = bill_date
+        bill["DueDate"] = bill_date
         
     if bill_number:
         bill["DocNumber"] = bill_number

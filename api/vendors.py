@@ -92,7 +92,7 @@ def single_vendor(one_vendor):
     response = requests.post(url, json=vendor, headers=headers)
         
     if response.status_code >= 300:
-        print(f"WARNING: Did not post {display_name} (duplicate or Customer)")
+        #print(f"WARNING: Did not post {display_name} (duplicate or Customer)")
         return False
         
     return True

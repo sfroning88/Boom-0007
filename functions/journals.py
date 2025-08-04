@@ -60,7 +60,8 @@ def extract_journals(file, exte):
                     'Memo': str(row.iloc[11]).strip() if pd.notna(row.iloc[11]) else None,
                     'Account': str(row.iloc[13]).strip() if pd.notna(row.iloc[13]) else None,
                     'Debit': 0.0,
-                    'Credit': 0.0
+                    'Credit': 0.0,
+                    'Id': None
                 }
 
             except Exception as e:

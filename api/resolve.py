@@ -7,30 +7,33 @@ def resolve_customers(invoices_extracted):
     customers_pre = get_customers()
     customers_post = customers_pre['Customer']
 
+    # pull all existing customers
     customers_existing = []
     for customer in customers_post:
         customers_existing.append(customer['DisplayName'])
     if len(customers_existing) == 0:
         return invoices_extracted
 
-    print(f"Customers len = {len(customers_existing)}")
+    print(f"CHECKPOINT: Customers len = {len(customers_existing)}")
 
     customers_new = []
     for customer_object in list(invoices_extracted.values()):
         customers_new.append(customer_object['Name'])
     customers_new = list(set(customers_new))
-    print(f"Found {len(customers_new)} new customers to add")
+    customers_new.sort()
+    print(f"CHECKPOINT: Found {len(customers_new)} new customers to add")
 
     # dictionary for rename mappings
     customer_mapping = {}
 
     # map new customers to closest match existing
     for invoice_name in customers_new:
+        # Check for exact match to skip
+        if invoice_name in customers_existing:
+            customers_new.remove(invoice_name)
+            continue
+
         for customer_name in customers_existing:
-            # Check for exact match to skip
-            if re.match(invoice_name, customer_name, re.IGNORECASE):
-                customers_new.remove(invoice_name)
-                break
 
            # Check for partial match to replace
             if re.search(invoice_name, customer_name, re.IGNORECASE):
@@ -45,13 +48,10 @@ def resolve_customers(invoices_extracted):
                 customers_new.remove(invoice_name)
                 break
 
-    print(f"Found these mappings: {customer_mapping}")
     for customer_object in list(invoices_extracted.values()):
         if customer_object['Name'] in list(customer_mapping.keys()):
-            print(f"Replacing {customer_object['Name']} with {customer_mapping[customer_object['Name']]}")
+            print(f"CHECKPOINT: Replacing {customer_object['Name']} with {customer_mapping[customer_object['Name']]}")
             customer_object['Name'] = customer_mapping[customer_object['Name']]
-    
-    print(f"Remaining new customers to add: {len(customers_new)}")
 
     customers_added = []
     for invoice_name in customers_new:
@@ -83,16 +83,17 @@ def resolve_cust_ids(invoices_extracted):
     for customer in customers_post:
         ids_mapping[customer['DisplayName']] = customer['Id']
     if len(ids_mapping.values()) != len(ids_mapping.keys()):
-        print("Customers does not equal ids, some other error occured")
+        print("ERROR: Customers does not equal ids, some other error occured")
         return invoices_extracted
     if len(list(ids_mapping.values())) == 0:
         return invoices_extracted
 
-    print(f"Customers/Ids len = {len(list(ids_mapping.values()))}")
+    print(f"CHECKPOINT: Customers/Ids len = {len(list(ids_mapping.values()))}")
 
     # assign each invoice the corresponding id
     for invoice_object in list(invoices_extracted.values()):
-        invoice_object['Id'] = ids_mapping[invoice_object['Name']]
+        if invoice_object['Name'] in list(ids_mapping.keys()):
+            invoice_object['Id'] = ids_mapping[invoice_object['Name']]
 
     return invoices_extracted
 
@@ -111,26 +112,26 @@ def resolve_vendors(bills_extracted):
     if len(vendors_existing) == 0:
         return bills_extracted
 
-    print(f"Vendors len = {len(vendors_existing)}")
+    print(f"CHECKPOINT: Vendors len = {len(vendors_existing)}")
 
     vendors_new = []
     for bill_object in list(bills_extracted.values()):
         vendors_new.append(bill_object['Name'])
     vendors_new = list(set(vendors_new))
-    print(f"Found {len(vendors_new)} new vendors to add")
+    print(f"CHECKPOINT: Found {len(vendors_new)} new vendors to add")
 
     # dictionary for rename mappings
     vendor_mapping = {}
 
     # map new customers to closest match existing
     for bill_name in vendors_new:
-        for vendor_name in vendors_existing:
-            # Check for exact match to skip
-            if re.match(bill_name, vendor_name, re.IGNORECASE):
-                vendors_new.remove(bill_name)
-                break
+        # Check for exact match to skip
+        if bill_name in vendors_existing:
+            vendors_new.remove(bill_name)
+            continue
 
-           # Check for partial match to replace
+        for vendor_name in vendors_existing:
+            # Check for partial match to replace
             if re.search(bill_name, vendor_name, re.IGNORECASE):
                 # if match found, add mapping of (old): (to replace with)
                 vendor_mapping[bill_name] = vendor_name
@@ -143,13 +144,10 @@ def resolve_vendors(bills_extracted):
                 vendors_new.remove(bill_name)
                 break
 
-    print(f"Found these mappings: {vendor_mapping}")
     for vendor_object in list(bills_extracted.values()):
         if vendor_object['Name'] in list(vendor_mapping.keys()):
-            print(f"Replacing {vendor_object['Name']} with {vendor_mapping[vendor_object['Name']]}")
+            print(f"CHECKPOINT: Replacing {vendor_object['Name']} with {vendor_mapping[vendor_object['Name']]}")
             vendor_object['Name'] = vendor_mapping[vendor_object['Name']]
-    
-    print(f"Remaining new vendors to add: {len(vendors_new)}")
 
     vendors_added = []
     for bill_name in vendors_new:
@@ -181,15 +179,16 @@ def resolve_vend_ids(bills_extracted):
     for vendor in vendors_post:
         ids_mapping[vendor['DisplayName']] = vendor['Id']
     if len(ids_mapping.values()) != len(ids_mapping.keys()):
-        print("Vendors does not equal ids, some other error occured")
+        print("ERROR: Vendors does not equal ids, some other error occured")
         return bills_extracted
     if len(list(ids_mapping.values())) == 0:
         return bills_extracted
 
-    print(f"Vendors/Ids len = {len(list(ids_mapping.values()))}")
+    print(f"CHECKPOINT: Vendors/Ids len = {len(list(ids_mapping.values()))}")
 
     # assign each invoice the corresponding id
     for bill_object in list(bills_extracted.values()):
-        bill_object['Id'] = ids_mapping[bill_object['Name']]
+        if bill_object['Name'] in list(ids_mapping.keys()):
+            bill_object['Id'] = ids_mapping[bill_object['Name']]
 
     return bills_extracted

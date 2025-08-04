@@ -12,14 +12,14 @@ def post_vendors(files):
             break
 
     if vendor_file_key is None:
-        print("Missing vendor file. Please upload file first.")
+        print("WARNING: Missing vendor file. Please upload file first.")
         return False
 
     vendor_file = files[vendor_file_key]
     vendor_extraction = vendor_file['df']
 
     # Concurrently post all vendors from vendors
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(vendor_threadsafe, list(vendor_extraction.values())), total=len(list(vendor_extraction.keys()))))
 
     print("##############################_POSTV_END_##############################")
@@ -29,20 +29,23 @@ def vendor_threadsafe(one_vendor):
     single_vendor(one_vendor)
 
 def single_vendor(one_vendor):
-    import os, requests
+    import os, requests, time, random
+
+    # Respectful delay to the server
+    time.sleep(random.uniform(0.3, 0.8))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
         return False
         
     # Clean and validate vendor data
     display_name = str(one_vendor.get('Vendor', '')).strip()
     if not display_name:
-        print("Vendor name is required")
+        print("ERROR: Vendor name is required")
         return False
             
     vendor = {
@@ -66,8 +69,8 @@ def single_vendor(one_vendor):
             "Line1": str(one_vendor['Bill From']).strip()
         }
 
-    if one_vendor.get('Fax'):
-        vendor["Fax"] = str(one_vendor['Fax']).strip()
+    #if one_vendor.get('Fax'):
+        #vendor["Fax"] = str(one_vendor['Fax']).strip()
 
     if one_vendor.get('Balance Total'):
         vendor["Balance"] = str(one_vendor['Balance Total']).strip()
@@ -89,40 +92,7 @@ def single_vendor(one_vendor):
     response = requests.post(url, json=vendor, headers=headers)
         
     if response.status_code >= 300:
+        print(f"WARNING: Did not post {display_name} (duplicate or Customer)")
         return False
         
     return True
-
-def get_vendors():
-    import os, requests
-        
-    # Get OAuth tokens from environment
-    access_token = os.environ.get('QBO_ACCESS_TOKEN')
-    realm_id = os.environ.get('QBO_REALM_ID')
-        
-    if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
-        return None
-        
-    # QBO API endpoint for querying customers
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
-    url = f'{base_url}/v3/company/{realm_id}/query?query=select DisplayName, Id FROM Vendor MAXRESULTS 1000&minorversion=75'
-        
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Accept': 'application/json'
-    }
-    
-    response = requests.get(url, headers=headers)
-        
-    if response.status_code < 300:
-        vendors_data = response.json()
-        if 'QueryResponse' in vendors_data and 'Vendor' in vendors_data['QueryResponse']:
-            vendors = vendors_data['QueryResponse']
-            return vendors
-        else:
-            print("No vendors found in QBO database.")
-            return {}
-    else:
-        print(f"Failed to retrieve vendors: {response.text}")
-        return None

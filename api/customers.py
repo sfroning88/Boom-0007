@@ -12,7 +12,7 @@ def post_customers(files):
             break
 
     if customer_file_key is None:
-        print("Missing customer file. Please upload file first.")
+        print("WARNING: Missing customer file. Please upload file first.")
         return False
 
     customer_file = files[customer_file_key]
@@ -28,6 +28,7 @@ def post_customers(files):
 def customer_threadsafe(one_customer):
     single_customer(one_customer)
 
+
 def single_customer(one_customer):
     import os, requests, time, random
 
@@ -39,13 +40,13 @@ def single_customer(one_customer):
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
         return False
         
     # Clean and validate customer data
     display_name = str(one_customer.get('Customer', '')).strip()
     if not display_name:
-        print("Customer name is required")
+        print("ERROR: Customer name is required")
         return False
             
     customer = {
@@ -66,8 +67,8 @@ def single_customer(one_customer):
             "Line1": str(one_customer['Bill To']).strip()
         }
 
-    if one_customer.get('Fax'):
-        customer["Fax"] = str(one_customer['Fax']).strip()
+    #if one_customer.get('Fax'):
+        #customer["Fax"] = str(one_customer['Fax']).strip()
 
     if one_customer.get('Balance Total'):
         customer["Balance"] = str(one_customer['Balance Total']).strip()
@@ -89,6 +90,7 @@ def single_customer(one_customer):
     response = requests.post(url, json=customer, headers=headers)
         
     if response.status_code >= 300:
+        print(f"WARNING: Did not post {display_name} (duplicate or Vendor")
         return False
         
     return True

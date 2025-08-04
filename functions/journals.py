@@ -59,43 +59,29 @@ def extract_journals(file, exte):
                     'Name': strip_nonabc(str(row.iloc[9])) if pd.notna(row.iloc[9]) else None,
                     'Memo': str(row.iloc[11]).strip() if pd.notna(row.iloc[11]) else None,
                     'Account': str(row.iloc[13]).strip() if pd.notna(row.iloc[13]) else None,
-                    'Debit': [],
-                    'Credit': []
+                    'Debit': 0.0,
+                    'Credit': 0.0
                 }
 
             except Exception as e:
                 print(e)
         
-        # Add data to current transaction
+        # Update current transaction with sum row values
         if current_transaction is not None:
-            try:
-                # Add Debit (column P, index 15) - use 0 for empty cells
-                if pd.notna(row.iloc[15]) and str(row.iloc[15]).strip() != "":
-                    # Convert numpy.float64 to regular float and format to 2 decimal places
-                    debit_value = float(row.iloc[15])
-                    current_transaction['Debit'].append(round(debit_value, 2))
-                else:
-                    current_transaction['Debit'].append(0.0)
+            # Update Debit (column P, index 15) - use 0 for empty cells
+            if pd.notna(row.iloc[15]) and str(row.iloc[15]).strip() != "":
+                # Convert numpy.float64 to regular float and format to 2 decimal places
+                debit_value = float(row.iloc[15])
+                current_transaction['Debit'] = round(debit_value, 2)
             
-                # Add Credit (column R, index 17) - use 0 for empty cells
-                if pd.notna(row.iloc[17]) and str(row.iloc[17]).strip() != "":
-                    # Convert numpy.float64 to regular float and format to 2 decimal places
-                    credit_value = float(row.iloc[17])
-                    current_transaction['Credit'].append(round(credit_value, 2))
-                else:
-                    current_transaction['Credit'].append(0.0)
-        
-            except Exception as e:
-                print(e)
+            # Update Credit (column R, index 17) - use 0 for empty cells
+            if pd.notna(row.iloc[17]) and str(row.iloc[17]).strip() != "":
+                # Convert numpy.float64 to regular float and format to 2 decimal places
+                credit_value = float(row.iloc[17])
+                current_transaction['Credit'] = round(credit_value, 2)
         
         # Check if this is the last row of the current transaction
         if is_last_row(row, next_row):
-            # Remove the final balancing row (last row) from Debit and Credit arrays
-            if current_transaction is not None and len(current_transaction['Debit']) > 0:
-                current_transaction['Debit'] = current_transaction['Debit'][:-1]
-            if current_transaction is not None and len(current_transaction['Credit']) > 0:
-                current_transaction['Credit'] = current_transaction['Credit'][:-1]
-            
             # Save the current transaction
             if current_transaction is not None:
                 extracted[transaction_counter] = current_transaction

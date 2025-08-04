@@ -127,13 +127,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Connecting to QBO...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -196,7 +196,7 @@
               '<div class="form-group mb-0" style="flex: 1;">' +
                 '<input type="file" id="file" name="file" accept=".csv,.xls,.xlsx" class="form-control-file" required style="color: #fff; font-size: 1.25rem; font-weight: bold;">' +
               '</div>' +
-              '<button type="submit" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold; font-size: 1.25rem;">Upload</button>' +
+              '<button type="submit" class="btn btn-primary" style="margin: 0; background: #90d382; border: none; padding: 24px 24px; border-radius: 8px; color: white; font-weight: bold; font-size: 1.25rem;">Upload a File</button>' +
               '<div class="img_cont_msg" style="margin-left: 12px;">' +
                 '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
               '</div>' +
@@ -229,14 +229,14 @@
               '</div>'
             );
 
-            // Show bot "Uploading..." bubble
+            // Show bot "Uploading..." bubble with animated thinking dots
             var uploadStatusId = 'upload-status-' + chatCounter;
             var botBubble = $('<div class="d-flex mb-3">' +
               '<div class="img_cont_msg" style="margin-right: 12px;">' +
                 '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
               '</div>' +
               '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-                '<b>BOOM Assistant</b><br><span id="' + uploadStatusId + '">File uploading...</span>' +
+                '<b>BOOM Assistant</b><br><span id="' + uploadStatusId + '"><span class="thinking-dots"></span></span>' +
               '</div>' +
             '</div>');
             $('#chat-messages').append(botBubble);
@@ -333,13 +333,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting all customers...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -381,13 +381,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting all vendors...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -429,13 +429,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting invoices...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -479,13 +479,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Posting all bills...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -527,13 +527,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Loading button function seven...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -575,13 +575,13 @@
             '</div>'
           );
 
-          // Show bot response
+          // Show bot response with animated thinking dots
           var botBubble = $('<div class="d-flex mb-3">' +
             '<div class="img_cont_msg" style="margin-right: 12px;">' +
               '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
             '</div>' +
             '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
-              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '">Loading button function eight...</span>' +
+              '<b>BOOM Assistant</b><br><span id="' + currentChatId + '"><span class="thinking-dots"></span></span>' +
             '</div>' +
           '</div>');
           $('#chat-messages').append(botBubble);
@@ -633,6 +633,26 @@
       }
       #chat-messages::-webkit-scrollbar-track {
         background: #23272f;
+      }
+      
+      /* Animated thought bubbles */
+      .thinking-dots {
+        display: inline-block;
+        font-size: 20px;
+        letter-spacing: 2px;
+        animation: thinking 1.5s infinite;
+      }
+      
+      @keyframes thinking {
+        0%, 20% { content: "."; }
+        40% { content: ".."; }
+        60% { content: "..."; }
+        80%, 100% { content: "."; }
+      }
+      
+      .thinking-dots::after {
+        content: ".";
+        animation: thinking 1.5s infinite;
       }
     </style>
   </body>

@@ -19,7 +19,7 @@ def post_customers(files):
     customer_extraction = customer_file['df']
 
     # Concurrently post all customers from customers
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(customer_threadsafe, list(customer_extraction.values())), total=len(list(customer_extraction.keys()))))
 
     print("##############################_POSTC_END_##############################")
@@ -50,32 +50,14 @@ def single_customer(one_customer):
         return False
             
     customer = {
-        "DisplayName": display_name
+        "DisplayName": display_name,
+        "Notes": one_customer['Primary Contact'] if one_customer['Primary Contact'] else "",
+        "PrimaryPhone": { "FreeFormNumber": one_customer['Main Phone'] if one_customer['Main Phone'] else "" },
+        "BillAddr": { "Line1": one_customer['Bill To'] if one_customer['Bill To'] else "" },
+        "Balance": one_customer['Balance Total'],
+        "OpenBalanceDate": "2024-12-31",
+        "CompanyName": display_name
     }
-        
-    # Add optional fields only if they have valid data
-    if one_customer.get('Primary Contact'):
-        customer["Notes"] = str(one_customer['Primary Contact']).strip()
-            
-    if one_customer.get('Main Phone'):
-        customer["PrimaryPhone"] = {
-            "FreeFormNumber": str(one_customer['Main Phone']).strip()
-        }
-            
-    if one_customer.get('Bill To'):
-        customer["BillAddr"] = {
-            "Line1": str(one_customer['Bill To']).strip()
-        }
-
-    #if one_customer.get('Fax'):
-        #customer["Fax"] = str(one_customer['Fax']).strip()
-
-    if one_customer.get('Balance Total'):
-        customer["Balance"] = str(one_customer['Balance Total']).strip()
-            
-    # Clean company name if available
-    if display_name:
-        customer["CompanyName"] = display_name
 
     # QBO API endpoint for creating customers
     base_url = 'https://sandbox-quickbooks.api.intuit.com'
@@ -90,7 +72,7 @@ def single_customer(one_customer):
     response = requests.post(url, json=customer, headers=headers)
         
     if response.status_code >= 300:
-        #print(f"WARNING: Did not post {display_name} (duplicate or Vendor)"
+        #print(f"WARNING: Did not post {display_name} (duplicate or Vendor")
         return False
         
     return True

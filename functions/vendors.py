@@ -25,29 +25,21 @@ def extract_vendors(file, exte):
     for i in range(len(df)):
         row = df.iloc[i]
         
-        try:
-            current_vendor = {
-                'Vendor': strip_nonabc(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
-                'Account #': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
-                'Bill From': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
-                'Primary Contact': str(row.iloc[8]) if pd.notna(row.iloc[8]) else None,
-                'Main Phone': str(row.iloc[10]) if pd.notna(row.iloc[10]) else None,
-                'Fax': str(row.iloc[12]) if pd.notna(row.iloc[12]) else None,
-                'Balance Total': round(float(row.iloc[14]), 2) if pd.notna(row.iloc[14]) else None
-            }
+        current_vendor = {
+            'Vendor': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
+            'Account #': str(row.iloc[4]) if pd.notna(row.iloc[4]) else None,
+            'Bill From': str(row.iloc[6]) if pd.notna(row.iloc[6]) else None,
+            'Primary Contact': str(row.iloc[8]) if pd.notna(row.iloc[8]) else None,
+            'Main Phone': str(row.iloc[10]) if pd.notna(row.iloc[10]) else None,
+            'Balance Total': round(float(row.iloc[14]), 2) if pd.notna(row.iloc[14]) else None
+        }
 
-            extracted[vendor_counter] = current_vendor
-            vendor_counter += 1
-
-        except Exception as e:
-            print(e)
+        extracted[vendor_counter] = current_vendor
+        vendor_counter += 1
 
     first_vendor_key = list(extracted.keys())[0]
     first_vendor = extracted[first_vendor_key]
-    print(f"Vendor Key: {first_vendor_key}")
-    print(f"Vendor Structure:")
-    for key, value in first_vendor.items():
-        print(f"  {key}: {value}")
+    print(f"CHECKPOINT: {first_vendor_key} accesses {first_vendor['Vendor']}")
 
     print("##############################_EXTRV_END_##############################")
     return extracted

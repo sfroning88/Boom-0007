@@ -1,5 +1,4 @@
 def resolve_customers(invoices_extracted):
-    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -23,52 +22,27 @@ def resolve_customers(invoices_extracted):
     customers_new.sort()
     print(f"CHECKPOINT: Found {len(customers_new)} new customers to add")
 
-    # dictionary for rename mappings
-    customer_mapping = {}
-
-    # map new customers to closest match existing
+    # remove any duplicate customers
     for invoice_name in customers_new:
-        # Check for exact match to skip
         if invoice_name in customers_existing:
             customers_new.remove(invoice_name)
-            continue
-
-        for customer_name in customers_existing:
-
-           # Check for partial match to replace
-            if re.search(invoice_name, customer_name, re.IGNORECASE):
-                # if match found, add mapping of (old): (to replace with)
-                customer_mapping[invoice_name] = customer_name
-                customers_new.remove(invoice_name)
-                break
-
-            elif re.search(customer_name, invoice_name, re.IGNORECASE):
-                # if match found, add mapping of (old): (to replace with)
-                customer_mapping[invoice_name] = customer_name
-                customers_new.remove(invoice_name)
-                break
-
-    for customer_object in list(invoices_extracted.values()):
-        if customer_object['Name'] in list(customer_mapping.keys()):
-            print(f"CHECKPOINT: Replacing {customer_object['Name']} with {customer_mapping[customer_object['Name']]}")
-            customer_object['Name'] = customer_mapping[customer_object['Name']]
 
     customers_added = []
     for invoice_name in customers_new:
         # Create dummy customer object and add to database
         dummy_customer = {
-            'Customer': invoice_name,
-            'Bill To': '',
-            'Primary Contact': '',
-            'Main Phone': '',
-            'Fax': '',
-            'Balance Total': 0.0
+            "Customer": invoice_name,
+            "Primary Contact": "",
+            "Main Phone": "",
+            "Bill To": "",
+            "Balance Total": 0.0
         }
+
         customers_added.append(dummy_customer)
 
     # Concurrently post all customers from customers
     from api.customers import customer_threadsafe
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(customer_threadsafe, customers_added), total=len(customers_added)))
 
     return invoices_extracted
@@ -98,7 +72,6 @@ def resolve_cust_ids(invoices_extracted):
     return invoices_extracted
 
 def resolve_vendors(bills_extracted):
-    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -120,51 +93,27 @@ def resolve_vendors(bills_extracted):
     vendors_new = list(set(vendors_new))
     print(f"CHECKPOINT: Found {len(vendors_new)} new vendors to add")
 
-    # dictionary for rename mappings
-    vendor_mapping = {}
-
-    # map new customers to closest match existing
+    # remove any duplicate vendors
     for bill_name in vendors_new:
-        # Check for exact match to skip
         if bill_name in vendors_existing:
             vendors_new.remove(bill_name)
-            continue
-
-        for vendor_name in vendors_existing:
-            # Check for partial match to replace
-            if re.search(bill_name, vendor_name, re.IGNORECASE):
-                # if match found, add mapping of (old): (to replace with)
-                vendor_mapping[bill_name] = vendor_name
-                vendors_new.remove(bill_name)
-                break
-
-            elif re.search(vendor_name, bill_name, re.IGNORECASE):
-                # if match found, add mapping of (old): (to replace with)
-                vendor_mapping[bill_name] = vendor_name
-                vendors_new.remove(bill_name)
-                break
-
-    for vendor_object in list(bills_extracted.values()):
-        if vendor_object['Name'] in list(vendor_mapping.keys()):
-            print(f"CHECKPOINT: Replacing {vendor_object['Name']} with {vendor_mapping[vendor_object['Name']]}")
-            vendor_object['Name'] = vendor_mapping[vendor_object['Name']]
 
     vendors_added = []
     for bill_name in vendors_new:
         # Create dummy vendor object and add to database
         dummy_vendor = {
-            'Vendor': bill_name,
-            'Bill To': '',
-            'Primary Contact': '',
-            'Main Phone': '',
-            'Fax': '',
-            'Balance Total': 0.0
+            "Vendor": bill_name,
+            "Account #": "",
+            "Primary Contact": "",
+            "Main Phone": "",
+            "Bill From": "",
+            "Balance Total": 0.0
         }
         vendors_added.append(dummy_vendor)
 
-    # Concurrently post all customers from customers
+    # Concurrently post all vendors from vendors
     from api.vendors import vendor_threadsafe
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(vendor_threadsafe, vendors_added), total=len(vendors_added)))
 
     return bills_extracted

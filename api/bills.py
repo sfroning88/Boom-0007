@@ -19,21 +19,21 @@ def post_bills(files):
     journal_file = files[journal_file_key]
     journal_extraction = journal_file['df']
 
-    # Collect the accounts payable Id
+    # Collect the expense account id
     from api.retrieve import get_expenses
     exp_id = get_expenses()
 
-    # Remove any non bill transactions 
-    from support.linetypes import bill_patterns
+    # Remove any non bill transactions or older transactions
     bill_extraction = journal_extraction.copy()
     for key in list(bill_extraction.keys()):
         transaction_type = bill_extraction[key]['Type']
-        if transaction_type.lower() == "bill":
+        transaction_date = bill_extraction[key]['Date']
+        if transaction_type.lower() == "bill" and transaction_date >= "2025-01-01":
             bill_extraction[key]['Exp_Id'] = exp_id
         else:
             bill_extraction.pop(key)
 
-    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post.")
+    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from 1/1/2025 onwards.")
 
     # Clean vendor names to best match
     from api.resolve import resolve_vendors
@@ -74,9 +74,13 @@ def single_bill(one_bill):
     # Extract bill data
     bill_date = one_bill['Date']
     bill_number = one_bill['Num']
-    memo = one_bill['Memo']
-    amount = one_bill['Credit']
-        
+    bill_memo = one_bill['Memo']
+    bill_amount = one_bill['Credit']
+
+    # net 30 terms default
+    from functions.stripping import days_timestamp
+    due_date = days_timestamp(bill_date, 30)
+
     # Create bill object according to QBO API specification
     bill = {
         "VendorRef": {
@@ -84,26 +88,21 @@ def single_bill(one_bill):
         },
         "Line": [{
             "DetailType": "AccountBasedExpenseLineDetail",
-            "Amount": amount,
             "AccountBasedExpenseLineDetail": {
                 "AccountRef": {
                 "value": one_bill['Exp_Id'],
                 "name": "Uncategorized Expense"
                 }
             },
-            "Description": memo if memo else "Bill line item"
-        }]
+            "Amount": bill_amount,
+            "Description": bill_memo if bill_memo else "Bill line item"
+        }],
+        "TotalAmt": bill_amount,
+        "TxnDate": bill_date,
+        "DueDate": due_date if due_date else bill_date,
+        "DocNumber": bill_number,
+        "PrivateNote": bill_memo if bill_memo else "Uncategorized Expense"
     }
-        
-    # Add optional fields if available
-    if bill_date:
-        bill["DueDate"] = bill_date
-        
-    if bill_number:
-        bill["DocNumber"] = bill_number
-        
-    if memo:
-        bill["PrivateNote"] = memo
 
     # QBO API endpoint for creating bills
     base_url = 'https://sandbox-quickbooks.api.intuit.com'

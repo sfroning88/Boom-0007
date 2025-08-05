@@ -19,7 +19,7 @@ def post_vendors(files):
     vendor_extraction = vendor_file['df']
 
     # Concurrently post all vendors from vendors
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
         list(tqdm(executor.map(vendor_threadsafe, list(vendor_extraction.values())), total=len(list(vendor_extraction.keys()))))
 
     print("##############################_POSTV_END_##############################")
@@ -49,35 +49,15 @@ def single_vendor(one_vendor):
         return False
             
     vendor = {
-        "DisplayName": display_name
+        "DisplayName": display_name,
+        "Notes": one_vendor['Primary Contact'] if one_vendor['Primary Contact'] else "",
+        "AcctNum": one_vendor['Account #'] if one_vendor['Account #'] else "",
+        "PrimaryPhone": { "FreeFormNumber": one_vendor['Main Phone'] if one_vendor['Main Phone'] else "" },
+        "BillAddr": { "Line1": one_vendor['Bill From'] if one_vendor['Bill From'] else "" },
+        "Balance": one_vendor['Balance Total'],
+        "OpenBalanceDate": "2024-12-31",
+        "CompanyName": display_name
     }
-        
-    # Add optional fields only if they have valid data
-    if one_vendor.get('Primary Contact'):
-        vendor["Notes"] = str(one_vendor['Primary Contact']).strip()
-
-    if one_vendor.get('Account #'):
-        vendor["AcctNum"] = str(one_vendor['Account #']).strip()
-
-    if one_vendor.get('Main Phone'):
-        vendor["PrimaryPhone"] = {
-            "FreeFormNumber": str(one_vendor['Main Phone']).strip()
-        }
-            
-    if one_vendor.get('Bill From'):
-        vendor["BillAddr"] = {
-            "Line1": str(one_vendor['Bill From']).strip()
-        }
-
-    #if one_vendor.get('Fax'):
-        #vendor["Fax"] = str(one_vendor['Fax']).strip()
-
-    if one_vendor.get('Balance Total'):
-        vendor["Balance"] = str(one_vendor['Balance Total']).strip()
-            
-    # Clean company name if available
-    if display_name:
-        vendor["CompanyName"] = display_name
 
     # QBO API endpoint for creating vendors
     base_url = 'https://sandbox-quickbooks.api.intuit.com'

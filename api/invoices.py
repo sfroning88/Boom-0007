@@ -19,19 +19,19 @@ def post_invoices(files):
     journal_file = files[journal_file_key]
     journal_extraction = journal_file['df']
 
-    # Remove any non invoice transactions
-    from support.linetypes import invoice_patterns
+    # Remove any non invoice transactions or older transactions
     invoice_extraction = journal_extraction.copy()
     for key in list(invoice_extraction.keys()):
         transaction_type = invoice_extraction[key]['Type']
-        if transaction_type.lower() == "invoice":
+        transaction_date = invoice_extraction[key]['Date']
+        if transaction_type.lower() == "invoice" and transaction_date >= "2025-01-01":
             continue
         else:
             invoice_extraction.pop(key)
 
-    print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post.")
+    print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post from 1/1/2025 onwards.")
 
-    # Clean customer names to best match
+    # Post all new customers from invoices
     from api.resolve import resolve_customers
     invoice_extraction = resolve_customers(invoice_extraction)
 
@@ -70,8 +70,12 @@ def single_invoice(one_invoice):
     # Extract invoice data
     invoice_date = one_invoice['Date']
     invoice_number = one_invoice['Num']
-    memo = one_invoice['Memo']
-    amount = one_invoice['Debit']
+    invoice_memo = one_invoice['Memo']
+    invoice_amount = one_invoice['Debit']
+
+    # net 30 terms default
+    from functions.stripping import days_timestamp
+    due_date = days_timestamp(invoice_date, 30)
         
     # Create invoice object according to QBO API specification
     invoice = {
@@ -79,21 +83,19 @@ def single_invoice(one_invoice):
             "value": one_invoice['Id']
         },
         "Line": [{
-            "DetailType": "DescriptionOnly",
-            "Amount": amount,
-            "Description": memo if memo else "Invoice line item"
-        }]
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+                "ServiceDate": invoice_date
+            },
+            "Amount": invoice_amount,
+            "Description": invoice_memo if invoice_memo else "Invoice line item"
+        }],
+        "TotalAmt": invoice_amount,
+        "TxnDate": invoice_date,
+        "DueDate": due_date if due_date else invoice_date,
+        "DocNumber": invoice_number,
+        "PrivateNote": invoice_memo if invoice_memo else "Uncategorized Income"
     }
-        
-    # Add optional fields if available
-    if invoice_date:
-        invoice["DueDate"] = invoice_date
-        
-    if invoice_number:
-        invoice["DocNumber"] = invoice_number
-        
-    if memo:
-        invoice["PrivateNote"] = memo
 
     # QBO API endpoint for creating invoices
     base_url = 'https://sandbox-quickbooks.api.intuit.com'

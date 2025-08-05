@@ -1,10 +1,10 @@
-def get_oauth_url(qbo_token, qbo_account):
+def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
     from intuitlib.client import AuthClient
     from intuitlib.enums import Scopes
 
     # Generate OAuth authorization URL for user to authorize once
     redirect_uri = "http://localhost:5000/oauth/callback"
-    auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment="sandbox")
+    auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment=env_mode)
     url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
         
     if len(url) > 0:

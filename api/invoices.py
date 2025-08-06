@@ -1,7 +1,6 @@
 def post_invoices(files):
     print("##############################_POSTI_BEGIN_##############################")
 
-    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -24,7 +23,8 @@ def post_invoices(files):
     for key in list(invoice_extraction.keys()):
         transaction_type = invoice_extraction[key]['Type']
         transaction_date = invoice_extraction[key]['Date']
-        if transaction_type.lower() == "invoice" and transaction_date >= "2025-01-01":
+        transaction_amount = invoice_extraction[key]['Amount']
+        if transaction_type.lower() == "invoice" and transaction_date >= "2025-01-01" and transaction_amount > 0:
             continue
         else:
             invoice_extraction.pop(key)
@@ -64,14 +64,14 @@ def single_invoice(one_invoice):
         return False
 
     if one_invoice['Id'] is None:
-        print(f"WARNING: Could not post invoice for {one_invoice['Name']}")
+        print(f"WARNING: Could not post invoice for {one_invoice['Name']}, Amount: ${one_invoice['Amount']}")
         return False
             
     # Extract invoice data
     invoice_date = one_invoice['Date']
     invoice_number = one_invoice['Num']
     invoice_memo = one_invoice['Memo']
-    invoice_amount = one_invoice['Debit']
+    invoice_amount = one_invoice['Amount']
 
     # net 30 terms default
     from functions.stripping import days_timestamp
@@ -110,8 +110,8 @@ def single_invoice(one_invoice):
     response = requests.post(url, json=invoice, headers=headers)
         
     if response.status_code >= 300:
-        print(f"ERROR: Failed to create invoice for {one_invoice['Name']}")
+        print(f"ERROR: Failed to create invoice for {one_invoice['Name']}, Amount: ${invoice_amount}")
         return False
         
-    #print(f"INVOICE: Posting invoice for {one_invoice['Name']}, Amount: ${amount}")
+    #print(f"INVOICE: Posting invoice for {one_invoice['Name']}, Amount: ${invoice_amount}")
     return True

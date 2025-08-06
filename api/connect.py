@@ -1,4 +1,12 @@
 def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
+    if qbo_token is None:
+        print("ERROR: Missing qbo_token from environment")
+        return None
+
+    if qbo_account is None:
+        print("ERROR: Missing qbo_account from environment")
+        return None
+    
     from intuitlib.client import AuthClient
     from intuitlib.enums import Scopes
 
@@ -14,7 +22,7 @@ def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
     print("ERROR: Failed to generate OAuth URL")
     return None
 
-def connect_qbo(qbo_token, qbo_account, auth_code=None, realm_id=None):
+def connect_qbo(qbo_token=None, qbo_account=None, auth_code=None, realm_id=None):
     print("##############################_QBO_BEGIN_##############################")
     
     import requests, os

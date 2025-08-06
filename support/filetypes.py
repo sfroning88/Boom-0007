@@ -9,3 +9,7 @@ vendor_patterns = [
 customer_patterns = [
     r"customer"
 ]
+
+account_patterns = [
+    r"account"
+]

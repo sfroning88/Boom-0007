@@ -13,15 +13,10 @@ def extract_vendors(file, exte):
     else:
         print("##############################_EXTRV_END_##############################")
         return {}
-    
-    num_rows, num_cols = df.shape
-
-    print(f"{num_rows} Rows, {num_cols} Cols were ingested")
 
     # Extract vendors
     vendor_counter = 0
 
-    from functions.stripping import strip_nonabc
     for i in range(len(df)):
         row = df.iloc[i]
         
@@ -43,3 +38,4 @@ def extract_vendors(file, exte):
 
     print("##############################_EXTRV_END_##############################")
     return extracted
+

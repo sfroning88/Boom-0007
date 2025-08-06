@@ -13,10 +13,6 @@ def extract_customers(file, exte):
     else:
         print("##############################_EXTRC_END_##############################")
         return {}
-    
-    num_rows, num_cols = df.shape
-
-    print(f"{num_rows} Rows, {num_cols} Cols were ingested")
 
     # Extract customer
     customer_counter = 0

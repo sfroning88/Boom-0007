@@ -69,7 +69,7 @@
                         • Post all Invoices<br>
                         • Post all Vendors<br>
                         • Post all Bills<br>
-                        • Button Function 7<br>
+                        • Post Chart of Accounts<br>
                         • Button Function 8<br><br>
                         What would you like to do today?
                       </div>
@@ -85,7 +85,7 @@
                     <div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">
                       <button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>
                       <button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>
-                      <button id="BUTTON_FUNCTION_SEVEN" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Seven</button>
+                      <button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>
                       <button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>
                       <div class="img_cont_msg" style="margin-left: 12px;">
                         <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">
@@ -269,7 +269,7 @@
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>' +
                     '<button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>' +
-                    '<button id="BUTTON_FUNCTION_SEVEN" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Seven</button>' +
+                    '<button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>' +
                     '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
                     '<div class="img_cont_msg" style="margin-left: 12px;">' +
                       '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
@@ -294,7 +294,7 @@
                   '<div style="display: flex; gap: 1em; justify-content: flex-end; align-items: center;">' +
                     '<button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>' +
                     '<button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>' +
-                    '<button id="BUTTON_FUNCTION_SEVEN" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Seven</button>' +
+                    '<button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>' +
                     '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
                     '<div class="img_cont_msg" style="margin-left: 12px;">' +
                       '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
@@ -510,16 +510,16 @@
           });
         });
 
-        $('#BUTTON_FUNCTION_SEVEN').off('click').on('click', function() {
+        $('#POST_ACCOUNTS').off('click').on('click', function() {
           chatCounter++;
           var currentChatId = 'call-status-' + chatCounter;
           
           // Show user message bubble
           $('#chat-messages').append(
             '<div class="d-flex mb-3 justify-content-end">' +
-              '<div class="p-3 rounded" style="background: #000000; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
+              '<div class="p-3 rounded" style="background: #f05ce4; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
                 '<span style="font-weight: bold;">You</span><br>' +
-                'Button Function Seven' +
+                'Post all Accounts' +
               '</div>' +
               '<div class="img_cont_msg" style="margin-left: 12px;">' +
                 '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
@@ -541,19 +541,19 @@
           // Scroll to bottom
           scrollToBottom();
 
-          // BUTTON FUNCTION SEVEN
+          // POST ACCOUNTS
           $.ajax({
-            url: '/BUTTON_FUNCTION_SEVEN',
+            url: '/POST_ACCOUNTS',
             type: 'POST',
             success: function (data) {
               if (data.success) {
-                $('#' + currentChatId).html('<span style="color: limegreen;">Button Function Seven success!</span>');
+                $('#' + currentChatId).html('<span style="color: limegreen;">Post Accounts success!</span>');
               } else {
-                $('#' + currentChatId).html('<span style="color: red;">Button Function Seven failure.</span>');
+                $('#' + currentChatId).html('<span style="color: red;">Post Accounts failure.</span>');
               }
             },
             error: function () {
-              $('#' + currentChatId).html('<span style="color: red;">Button Function Seven error.</span>');
+              $('#' + currentChatId).html('<span style="color: red;">Post Accounts error.</span>');
             }
           });
         });

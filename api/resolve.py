@@ -2,8 +2,8 @@ def resolve_customers(invoices_extracted):
     import concurrent.futures
     from tqdm import tqdm
 
-    from api.retrieve import get_customers
-    customers_pre = get_customers()
+    from api.retrieve import get_database
+    customers_pre = get_database(query_mode="Customer")
     customers_post = customers_pre['Customer']
 
     # pull all existing customers
@@ -13,14 +13,13 @@ def resolve_customers(invoices_extracted):
     if len(customers_existing) == 0:
         return invoices_extracted
 
-    print(f"CHECKPOINT: Customers len = {len(customers_existing)}")
+    print(f"CHECKPOINT: Found {len(customers_existing)} existing Customers")
 
     customers_new = []
     for customer_object in list(invoices_extracted.values()):
         customers_new.append(customer_object['Name'])
     customers_new = list(set(customers_new))
     customers_new.sort()
-    print(f"CHECKPOINT: Found {len(customers_new)} new customers to add")
 
     # remove any duplicate customers
     for invoice_name in customers_new:
@@ -40,6 +39,8 @@ def resolve_customers(invoices_extracted):
 
         customers_added.append(dummy_customer)
 
+    print(f"CHECKPOINT: Found {len(customers_added)} new Customers to add")
+
     # Concurrently post all customers from customers
     from api.customers import customer_threadsafe
     with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
@@ -48,8 +49,8 @@ def resolve_customers(invoices_extracted):
     return invoices_extracted
 
 def resolve_cust_ids(invoices_extracted):
-    from api.retrieve import get_customers
-    customers_pre = get_customers()
+    from api.retrieve import get_database
+    customers_pre = get_database(query_mode="Customer")
     customers_post = customers_pre['Customer']
 
     # pull QBO id from customers
@@ -62,7 +63,7 @@ def resolve_cust_ids(invoices_extracted):
     if len(list(ids_mapping.values())) == 0:
         return invoices_extracted
 
-    print(f"CHECKPOINT: Customers/Ids len = {len(list(ids_mapping.values()))}")
+    print(f"CHECKPOINT: Found {len(list(ids_mapping.values()))} existing Ids")
 
     # assign each invoice the corresponding id
     for invoice_object in list(invoices_extracted.values()):
@@ -75,8 +76,8 @@ def resolve_vendors(bills_extracted):
     import concurrent.futures
     from tqdm import tqdm
 
-    from api.retrieve import get_vendors
-    vendors_pre = get_vendors()
+    from api.retrieve import get_database
+    vendors_pre = get_database(query_mode="Vendor")
     vendors_post = vendors_pre['Vendor']
 
     vendors_existing = []
@@ -85,13 +86,12 @@ def resolve_vendors(bills_extracted):
     if len(vendors_existing) == 0:
         return bills_extracted
 
-    print(f"CHECKPOINT: Vendors len = {len(vendors_existing)}")
+    print(f"CHECKPOINT: Found {len(vendors_existing)} existing Vendors")
 
     vendors_new = []
     for bill_object in list(bills_extracted.values()):
         vendors_new.append(bill_object['Name'])
     vendors_new = list(set(vendors_new))
-    print(f"CHECKPOINT: Found {len(vendors_new)} new vendors to add")
 
     # remove any duplicate vendors
     for bill_name in vendors_new:
@@ -111,6 +111,8 @@ def resolve_vendors(bills_extracted):
         }
         vendors_added.append(dummy_vendor)
 
+    print(f"CHECKPOINT: Found {len(vendors_added)} new Vendors to add")
+
     # Concurrently post all vendors from vendors
     from api.vendors import vendor_threadsafe
     with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
@@ -119,8 +121,8 @@ def resolve_vendors(bills_extracted):
     return bills_extracted
 
 def resolve_vend_ids(bills_extracted):
-    from api.retrieve import get_vendors
-    vendors_pre = get_vendors()
+    from api.retrieve import get_database
+    vendors_pre = get_database(query_mode="Vendor")
     vendors_post = vendors_pre['Vendor']
 
     # pull QBO id from customers
@@ -133,7 +135,7 @@ def resolve_vend_ids(bills_extracted):
     if len(list(ids_mapping.values())) == 0:
         return bills_extracted
 
-    print(f"CHECKPOINT: Vendors/Ids len = {len(list(ids_mapping.values()))}")
+    print(f"CHECKPOINT: Found {len(list(ids_mapping.values()))} existing Ids")
 
     # assign each invoice the corresponding id
     for bill_object in list(bills_extracted.values()):

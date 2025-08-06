@@ -74,15 +74,19 @@ def UPLOAD_FILE():
             case "vendor":
                 from functions.vendors import extract_vendors
                 extracted = extract_vendors(file, exte)
+            case "account":
+                from functions.accounts import extract_accounts
+                extracted = extract_accounts(file, exte)
             case _:
                 pass
 
-        print(f"File Code {code} processed successfully.")
-        files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
+        if extracted is not None:
+            print(f"CHECKPOINT: File Code {code} processed successfully.")
+            files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
+            return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
 
-        return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
-
-    return jsonify({'success': False, 'message': 'Invalid file extension.'}), 400
+    print(f"WARNING: File was not processed or other data validation error")
+    return jsonify({'success': False, 'message': 'Invalid file extension or processing error.'}), 400
 
 # send customers over to QBD
 @app.route('/POST_CUSTOMERS', methods=['POST'])
@@ -128,13 +132,15 @@ def POST_BILLS():
         
     return jsonify({'success': False, 'message': 'Posting Bills failed.'}), 400
 
-@app.route('/BUTTON_FUNCTION_SEVEN', methods=['POST'])
-def BUTTON_FUNCTION_SEVEN():
-    try:
-        return jsonify({'success': True, 'message': 'Button Function Seven success.'}), 200
+@app.route('/POST_ACCOUNTS', methods=['POST'])
+def POST_ACCOUNTS():
+    from api.accounts import post_accounts
+    result = post_accounts(files)
     
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 400
+    if result:
+        return jsonify({'success': True, 'message': 'Posting Accounts success'}), 200
+    
+    return jsonify({'success': False, 'message': 'Posting Accounts failed.'}), 400
 
 @app.route('/BUTTON_FUNCTION_EIGHT', methods=['POST'])
 def BUTTON_FUNCTION_EIGHT():

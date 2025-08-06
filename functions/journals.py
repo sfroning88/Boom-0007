@@ -30,11 +30,9 @@ def extract_journals(file, exte):
     
     num_rows, num_cols = df.shape
 
-    print(f"{num_rows} Rows, {num_cols} Cols were ingested")
-
     # Extract transactions
     transaction_counter = 0
-    current_transaction = None
+    current_transaction_header = None
     
     for i in range(len(df)):
         row = df.iloc[i]
@@ -42,55 +40,64 @@ def extract_journals(file, exte):
         
         # Check if this is the first row of a new transaction
         if is_first_row(row):
-            # If we have a current transaction, save it
-            if current_transaction is not None:
-                extracted[transaction_counter] = current_transaction
-                transaction_counter += 1
-            
-            # Start new transaction
+            # Start new transaction header
             from functions.stripping import strip_timestamp
-            current_transaction = {
+            current_transaction_header = {
                 'Trans #': str(int(row.iloc[1])).strip() if pd.notna(row.iloc[1]) else None,
                 'Type': str(row.iloc[3]).strip() if pd.notna(row.iloc[3]) else None,
                 'Date': strip_timestamp(str(row.iloc[5])) if pd.notna(row.iloc[5]) else "2025-01-01",
                 'Num': str(row.iloc[7]).strip() if pd.notna(row.iloc[7]) else None,
-                'Name': str(str(row.iloc[9])) if pd.notna(row.iloc[9]) else None,
+                'Name': str(str(row.iloc[9])) if pd.notna(row.iloc[9]) else "UNDEFINED NAME",
                 'Memo': str(row.iloc[11]).strip() if pd.notna(row.iloc[11]) else None,
-                'Account': str(row.iloc[13]).strip() if pd.notna(row.iloc[13]) else None,
-                'Debit': 0.0,
-                'Credit': 0.0,
-                'Id': None
+                'Id': None,
+                'Exp Id': None
             }
         
-        # Update current transaction with sum row values
-        if current_transaction is not None:
-            # Update Debit (column P, index 15) - use 0 for empty cells
-            if pd.notna(row.iloc[15]) and str(row.iloc[15]).strip() != "":
-                # Convert numpy.float64 to regular float and format to 2 decimal places
-                debit_value = float(row.iloc[15])
-                current_transaction['Debit'] = round(debit_value, 2)
+        # Process line items for current transaction (skip first row, only process rows 2 onwards)
+        if current_transaction_header is not None and not is_first_row(row):
+            # Check if this row has account information (not a total/summary row)
+            account_name = str(row.iloc[13]).strip() if pd.notna(row.iloc[13]) else ""
             
-            # Update Credit (column R, index 17) - use 0 for empty cells
-            if pd.notna(row.iloc[17]) and str(row.iloc[17]).strip() != "":
-                # Convert numpy.float64 to regular float and format to 2 decimal places
-                credit_value = float(row.iloc[17])
-                current_transaction['Credit'] = round(credit_value, 2)
+            # Only process line items if there's an account name and type is valid
+            if account_name and account_name != "" and current_transaction_header['Type'] in ["Bill", "Invoice", "Check"]:
+                # Calculate amount as max of Debit/Credit
+                debit_value = 0.0
+                credit_value = 0.0
+                
+                if pd.notna(row.iloc[15]) and str(row.iloc[15]).strip() != "":
+                    debit_value = float(row.iloc[15])
+                
+                if pd.notna(row.iloc[17]) and str(row.iloc[17]).strip() != "":
+                    credit_value = float(row.iloc[17])
+                
+                amount = max(debit_value, credit_value)
+                
+                # Create transaction object for this line item
+                transaction = {
+                    'Trans #': current_transaction_header['Trans #'],
+                    'Type': current_transaction_header['Type'],
+                    'Date': current_transaction_header['Date'],
+                    'Num': current_transaction_header['Num'],
+                    'Name': current_transaction_header['Name'],
+                    'Memo': current_transaction_header['Memo'],
+                    'Account': account_name,
+                    'Amount': round(amount, 2),
+                    'Id': current_transaction_header['Id'],
+                    'Exp Id': current_transaction_header['Exp Id']
+                }
+                
+                extracted[transaction_counter] = transaction
+                transaction_counter += 1
         
         # Check if this is the last row of the current transaction
         if is_last_row(row, next_row):
-            # Save the current transaction
-            if current_transaction is not None:
-                extracted[transaction_counter] = current_transaction
-                transaction_counter += 1
-                current_transaction = None
+            current_transaction_header = None
     
-    # Handle the last transaction if it wasn't saved
-    if current_transaction is not None:
-        extracted[transaction_counter] = current_transaction
+    first_transaction = extracted[0] if extracted else None
+    if first_transaction is None:
+        print(f"WARNING: No transactions were found from the journal file or data validation error")
+        return None
     
-    first_transaction_key = list(extracted.keys())[0]
-    first_transaction = extracted[first_transaction_key]
-    print(f"CHECKPOINT: {first_transaction_key} accesses {first_transaction['Type']} for {first_transaction['Name']}")
-
+    print(f"CHECKPOINT: 0 accesses {first_transaction['Type']} for {first_transaction['Name']}")
     print("##############################_EXTRJ_END_##############################")
     return extracted

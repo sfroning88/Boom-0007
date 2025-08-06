@@ -1,7 +1,6 @@
 def post_bills(files):
     print("##############################_POSTB_BEGIN_##############################")
 
-    import re
     import concurrent.futures
     from tqdm import tqdm
 
@@ -19,19 +18,64 @@ def post_bills(files):
     journal_file = files[journal_file_key]
     journal_extraction = journal_file['df']
 
-    # Collect the expense account id
-    from api.retrieve import get_expenses
-    exp_id = get_expenses()
+    # Determine accounts file
+    account_file_key = None
+    for single_file_key in files.keys():
+        if files[single_file_key]['type'] == "account" and files[single_file_key]['uploaded'] == False:
+            account_file_key = single_file_key
+            break
+
+    if account_file_key is None:
+        print("WARNING: Missing accounts file, please upload file first")
+        return False
+
+    account_file = files[account_file_key]
+    account_extraction = account_file['df']
+
+    account_olds = []
+    for account_object in list(account_extraction.values()):
+        account_olds.append(account_object['Old'])
+
+    # Collect the expense account ids
+    from api.retrieve import get_database
+    accounts_pre = get_database(query_mode="Account")
+    accounts_post = accounts_pre['Account']
+
+    exp_id_mapping = {}
+    for account_object in accounts_post:
+        exp_id_mapping[account_object['Name']] = account_object['Id']
 
     # Remove any non bill transactions or older transactions
+    from functions.stripping import strip_nonabc
     bill_extraction = journal_extraction.copy()
     for key in list(bill_extraction.keys()):
-        transaction_type = bill_extraction[key]['Type']
+        transaction_type = bill_extraction[key]['Type'].lower()
         transaction_date = bill_extraction[key]['Date']
-        if transaction_type.lower() == "bill" and transaction_date >= "2025-01-01":
-            bill_extraction[key]['Exp_Id'] = exp_id
-        else:
+        transaction_amount = bill_extraction[key]['Amount']
+        transaction_account = strip_nonabc(bill_extraction[key]['Account'])
+
+        if transaction_type not in ["bill", "check"]:
             bill_extraction.pop(key)
+            continue
+
+        if transaction_date < "2025-01-01":
+            bill_extraction.pop(key)
+            continue
+
+        if transaction_amount == 0.0:
+            bill_extraction.pop(key)
+            continue
+
+        if transaction_account not in account_olds:
+            print(f"WARNING: Bill tied to account {bill_extraction[key]['Account']} does not exist in Chart of Accounts")
+            bill_extraction.pop(key)
+            continue
+
+        for account_object in list(account_extraction.values()):
+            if transaction_account == account_object['Old']:
+                qbo_account = account_object['Full']
+        
+        bill_extraction[key]['Exp_Id'] = exp_id_mapping[qbo_account]
 
     print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from 1/1/2025 onwards.")
 
@@ -68,38 +112,42 @@ def single_bill(one_bill):
         return False
 
     if one_bill['Id'] is None:
-        print(f"WARNING: Could not post bill for {one_bill['Name']}")
+        print(f"ERROR: Missing Id for {one_bill['Name']}, Amount: ${one_bill['Credit']}")
         return False
             
     # Extract bill data
+    bill_name = one_bill['Name']
+    bill_id = one_bill['Id']
     bill_date = one_bill['Date']
     bill_number = one_bill['Num']
     bill_memo = one_bill['Memo']
-    bill_amount = one_bill['Credit']
+    bill_amount = one_bill['Amount']
+    bill_account = one_bill['Account']
+    bill_exp_id = one_bill['Exp_Id']
 
     # net 30 terms default
     from functions.stripping import days_timestamp
-    due_date = days_timestamp(bill_date, 30)
+    bill_due_date = days_timestamp(bill_date, 30)
 
     # Create bill object according to QBO API specification
     bill = {
         "VendorRef": {
-            "value": one_bill['Id']
+            "value": bill_id
         },
         "Line": [{
             "DetailType": "AccountBasedExpenseLineDetail",
             "AccountBasedExpenseLineDetail": {
                 "AccountRef": {
-                "value": one_bill['Exp_Id'],
-                "name": "Uncategorized Expense"
+                "value": bill_exp_id,
+                "name": bill_account
                 }
             },
             "Amount": bill_amount,
-            "Description": bill_memo if bill_memo else "Bill line item"
+            "Description": bill_memo if bill_memo else "Uncategorized Expense"
         }],
         "TotalAmt": bill_amount,
         "TxnDate": bill_date,
-        "DueDate": due_date if due_date else bill_date,
+        "DueDate": bill_due_date if bill_due_date else bill_date,
         "DocNumber": bill_number,
         "PrivateNote": bill_memo if bill_memo else "Uncategorized Expense"
     }
@@ -117,8 +165,8 @@ def single_bill(one_bill):
     response = requests.post(url, json=bill, headers=headers)
         
     if response.status_code >= 300:
-        print(f"ERROR: Failed to create bill for {one_bill['Name']}")
+        print(f"ERROR: Failed to create bill for {bill_name}, Amount: ${bill_amount}")
         return False
         
-    #print(f"BILL: Posting bill for {one_bill['Name']}, Amount: ${amount}")
+    #print(f"BILL: Posting bill for {bill_name}, Amount: ${bill_amount}")
     return True

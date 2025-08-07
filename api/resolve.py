@@ -4,6 +4,11 @@ def resolve_customers(invoices_extracted):
 
     from api.retrieve import get_database
     customers_pre = get_database(query_mode="Customer")
+
+    if customers_pre is None or 'Customer' not in list(customers_pre.keys()):
+        print("WARNING: Please upload Customers to QBO before posting invoices")
+        return None
+
     customers_post = customers_pre['Customer']
 
     # pull all existing customers
@@ -78,6 +83,10 @@ def resolve_vendors(bills_extracted):
 
     from api.retrieve import get_database
     vendors_pre = get_database(query_mode="Vendor")
+    if vendors_pre is None or 'Vendor' not in list(vendors_pre.keys()):
+        print("WARNING: Please upload Vendors to QBO before posting bills")
+        return None
+    
     vendors_post = vendors_pre['Vendor']
 
     vendors_existing = []

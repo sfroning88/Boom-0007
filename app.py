@@ -212,8 +212,8 @@ if __name__ == '__main__':
     support.config.files = {}
 
     # beginning and end date (future will be set from dropdown)
-    support.config.begin_date = "2025-02-01"
-    support.config.end_date = "2025-02-07"
+    support.config.begin_date = "2025-01-01"
+    support.config.end_date = "2025-03-31"
 
     # Validate global variables are properly set
     print(f"CHECKPOINT: Environment mode set to: {support.config.env_mode}")

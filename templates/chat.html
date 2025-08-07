@@ -54,7 +54,30 @@
                   </div>
                 </div>
                 <div class="card-body msg_card_body d-flex flex-column align-items-center justify-content-end" style="height: 100%; padding-bottom: 0;">
-                  <div id="chat-messages" style="width: 95%; max-width: 95%; height: 60vh; margin-bottom: 2em; overflow-y: auto; background: transparent;">
+                  <!-- Global Variables Dropdown Section -->
+                  <div id="global-vars-section" style="width: 95%; max-width: 95%; margin-bottom: 1em; background: #23272f; border-radius: 16px; padding: 1em;">
+                    <div style="display: flex; gap: 1em; align-items: center; justify-content: center; flex-wrap: wrap;">
+                      <div style="display: flex; align-items: center; gap: 0.5em;">
+                        <label for="env-mode" style="color: #fff; font-weight: bold; margin: 0;">Env Mode:</label>
+                        <select id="env-mode" style="background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px;">
+                          <option value="sandbox">Sandbox</option>
+                          <option value="production">Production</option>
+                        </select>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 0.5em;">
+                        <label for="begin-date" style="color: #fff; font-weight: bold; margin: 0;">Begin Date:</label>
+                        <select id="begin-date" style="background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px;">
+                        </select>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 0.5em;">
+                        <label for="end-date" style="color: #fff; font-weight: bold; margin: 0;">End Date:</label>
+                        <select id="end-date" style="background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 8px;">
+                        </select>
+                      </div>
+                      <button id="update-globals" class="btn btn-primary" style="background: #007bff; border: none; padding: 4px 12px; border-radius: 4px; color: white; font-weight: bold;">Update</button>
+                    </div>
+                  </div>
+                  <div id="chat-messages" style="width: 95%; max-width: 95%; height: 50vh; margin-bottom: 2em; overflow-y: auto; background: transparent;">
                     <!-- Initial bot message -->
                     <div class="d-flex mb-3">
                       <div class="img_cont_msg" style="margin-right: 12px;">
@@ -70,7 +93,7 @@
                         • Post all Vendors<br>
                         • Post all Bills<br>
                         • Post Chart of Accounts<br>
-                        • Button Function 8<br><br>
+                        • Post Bank Accounts<br><br>
                         What would you like to do today?
                       </div>
                     </div>
@@ -86,7 +109,7 @@
                       <button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>
                       <button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>
                       <button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>
-                      <button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>
+                      <button id="POST_BANKS" class="btn btn-primary" style="margin: 0; background: #3d0bdf; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Banks</button>
                       <div class="img_cont_msg" style="margin-left: 12px;">
                         <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">
                       </div>
@@ -101,6 +124,35 @@
 
     <script>
       var chatCounter = 0;
+      
+      // Populate date dropdowns
+      function populateDateDropdowns() {
+        const beginDateSelect = document.getElementById('begin-date');
+        const endDateSelect = document.getElementById('end-date');
+        
+        // Clear existing options
+        beginDateSelect.innerHTML = '';
+        endDateSelect.innerHTML = '';
+        
+        // Generate date options for 2020-2025
+        for (let year = 2020; year <= 2025; year++) {
+          for (let month = 1; month <= 12; month++) {
+            for (let day = 1; day <= 31; day++) {
+              const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+              const option = document.createElement('option');
+              option.value = dateStr;
+              option.textContent = dateStr;
+              
+              beginDateSelect.appendChild(option.cloneNode(true));
+              endDateSelect.appendChild(option);
+            }
+          }
+        }
+        
+        // Set default values
+        beginDateSelect.value = '2025-01-01';
+        endDateSelect.value = '2025-01-31';
+      }
       
       function scrollToBottom() {
         setTimeout(function() {
@@ -270,7 +322,7 @@
                     '<button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>' +
                     '<button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>' +
                     '<button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>' +
-                    '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
+                    '<button id="POST_BANKS" class="btn btn-primary" style="margin: 0; background: #3d0bdf; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Banks</button>' +
                     '<div class="img_cont_msg" style="margin-left: 12px;">' +
                       '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
                     '</div>' +
@@ -295,7 +347,7 @@
                     '<button id="POST_VENDORS" class="btn btn-primary" style="margin: 0; background: #ff6b35; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Vendors</button>' +
                     '<button id="POST_BILLS" class="btn btn-primary" style="margin: 0; background: #6811d1; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Bills</button>' +
                     '<button id="POST_ACCOUNTS" class="btn btn-primary" style="margin: 0; background: #f05ce4; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Accounts</button>' +
-                    '<button id="BUTTON_FUNCTION_EIGHT" class="btn btn-primary" style="margin: 0; background: #000000; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Button Function Eight</button>' +
+                    '<button id="POST_BANKS" class="btn btn-primary" style="margin: 0; background: #3d0bdf; border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold;">Post all Banks</button>' +
                     '<div class="img_cont_msg" style="margin-left: 12px;">' +
                       '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
                     '</div>' +
@@ -565,7 +617,7 @@
           // Show user message bubble
           $('#chat-messages').append(
             '<div class="d-flex mb-3 justify-content-end">' +
-              '<div class="p-3 rounded" style="background: #000000; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
+              '<div class="p-3 rounded" style="background: #3d0bdf; color: #fff; border-radius: 16px 16px 4px 16px; max-width: 80%;">' +
                 '<span style="font-weight: bold;">You</span><br>' +
                 'Button Function Eight' +
               '</div>' +
@@ -589,25 +641,77 @@
           // Scroll to bottom
           scrollToBottom();
 
-          // BUTTON FUNCTION EIGHT
+          // POST BANKS
           $.ajax({
-            url: '/BUTTON_FUNCTION_EIGHT',
+            url: '/POST_BANKS',
             type: 'POST',
             success: function (data) {
               if (data.success) {
-                $('#' + currentChatId).html('<span style="color: limegreen;">Button Function Eight success!</span>');
+                $('#' + currentChatId).html('<span style="color: limegreen;">Post Banks success!</span>');
               } else {
-                $('#' + currentChatId).html('<span style="color: red;">Button Function Eight failure.</span>');
+                $('#' + currentChatId).html('<span style="color: red;">Post Banks failure.</span>');
               }
             },
             error: function () {
-              $('#' + currentChatId).html('<span style="color: red;">Button Function Eight error.</span>');
+              $('#' + currentChatId).html('<span style="color: red;">Post Banks error.</span>');
             }
           });
         });
       }
 
+      // Handle global variables update
+      $('#update-globals').off('click').on('click', function() {
+        const envMode = $('#env-mode').val();
+        const beginDate = $('#begin-date').val();
+        const endDate = $('#end-date').val();
+        
+        $.ajax({
+          url: '/SET_GLOBAL_VARS',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            env_mode: envMode,
+            begin_date: beginDate,
+            end_date: endDate
+          }),
+          success: function(data) {
+            if (data.success) {
+              // Show success message in chat
+              chatCounter++;
+              $('#chat-messages').append(
+                '<div class="d-flex mb-3">' +
+                  '<div class="img_cont_msg" style="margin-right: 12px;">' +
+                    '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+                  '</div>' +
+                  '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
+                    '<b>BOOM Assistant</b><br><span style="color: limegreen;">Global variables updated successfully!</span>' +
+                  '</div>' +
+                '</div>'
+              );
+              scrollToBottom();
+            }
+          },
+          error: function() {
+            chatCounter++;
+            $('#chat-messages').append(
+              '<div class="d-flex mb-3">' +
+                '<div class="img_cont_msg" style="margin-right: 12px;">' +
+                  '<img src="https://media.licdn.com/dms/image/v2/D560BAQHK10HmqRh1rQ/company-logo_200_200/company-logo_200_200/0/1701815665068/wealthboom_logo?e=1755129600&v=beta&t=0RhPS_izHlCe2NRvKtO7mgT7LXo6T87muFlK-HR_noE" class="rounded-circle user_img_msg" style="width: 40px; height: 40px; object-fit: cover;">' +
+                '</div>' +
+                '<div class="p-3 rounded" style="background: #23272f; color: #fff; border-radius: 16px 16px 16px 4px; max-width: 80%;">' +
+                  '<b>BOOM Assistant</b><br><span style="color: red;">Failed to update global variables.</span>' +
+                '</div>' +
+              '</div>'
+            );
+            scrollToBottom();
+          }
+        });
+      });
+
       $(document).ready(function () {
+        // Populate date dropdowns on page load
+        populateDateDropdowns();
+        
         // Scroll to bottom on page load
         scrollToBottom();
         attachButtonHandlers();

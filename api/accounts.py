@@ -17,7 +17,7 @@ def post_accounts(files):
     account_extraction = account_file['df']
 
     # Concurrently post all accounts
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(account_threadsafe, list(account_extraction.values())), total=len(list(account_extraction.keys()))))
     
     return True
@@ -30,7 +30,7 @@ def single_account(one_account):
     import os, requests, time, random
 
     # Respectful delay to the server
-    time.sleep(random.uniform(0.3, 0.8))
+    time.sleep(random.uniform(0.8, 1.2))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -47,7 +47,7 @@ def single_account(one_account):
 
     # Create account object according to QBO API specification
     account = {
-        "Name": account_full,
+        "Name": account_name,
         "AcctNum": account_num,
         "Description": account_name,
         "AccountType": "Expense",
@@ -55,7 +55,8 @@ def single_account(one_account):
     }
 
     # QBO API endpoint for creating accounts
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/account?minorversion=75'
         
     headers = {

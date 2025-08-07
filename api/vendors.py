@@ -60,8 +60,8 @@ def single_vendor(one_vendor):
     }
 
     # QBO API endpoint for creating vendors
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/vendor?minorversion=75'
         
     headers = {

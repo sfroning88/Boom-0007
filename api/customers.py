@@ -60,8 +60,8 @@ def single_customer(one_customer):
     }
 
     # QBO API endpoint for creating customers
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/customer?minorversion=75'
         
     headers = {

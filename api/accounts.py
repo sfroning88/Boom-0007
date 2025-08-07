@@ -37,7 +37,7 @@ def single_account(one_account):
     realm_id = os.environ.get('QBO_REALM_ID')
         
     if not access_token or not realm_id:
-        print("WARNING: Missing OAuth tokens. Please complete OAuth flow first.")
+        print("WARNING: Missing OAuth tokens, please complete OAuth flow first")
         return False
             
     # Extract account data
@@ -55,8 +55,8 @@ def single_account(one_account):
     }
 
     # QBO API endpoint for creating accounts
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/account?minorversion=75'
         
     headers = {

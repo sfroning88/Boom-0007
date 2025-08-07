@@ -11,6 +11,7 @@ ngrok_token = os.environ.get('NGROK_API_TOKEN')
 
 @app.route('/')
 def home():
+    # Render base home template
     return render_template('chat.html')
 
 # connecting first time to qbo for authorization
@@ -146,28 +147,49 @@ def POST_ACCOUNTS():
     
     return jsonify({'success': False, 'message': 'Posting Accounts failed.'}), 400
 
-@app.route('/BUTTON_FUNCTION_EIGHT', methods=['POST'])
-def BUTTON_FUNCTION_EIGHT():
+@app.route('/SET_GLOBAL_VARS', methods=['POST'])
+def SET_GLOBAL_VARS():
+    import support.config
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    env_mode = data.get('env_mode')
+    begin_date = data.get('begin_date')
+    end_date = data.get('end_date')
+    
+    if env_mode and env_mode in ['sandbox', 'production']:
+        support.config.env_mode = env_mode
+    
+    if begin_date:
+        support.config.begin_date = begin_date
+    
+    if end_date:
+        support.config.end_date = end_date
+    
+    return jsonify({'success': True, 'message': 'Global variables updated successfully'}), 200
+
+@app.route('/POST_BANKS', methods=['POST'])
+def POST_BANKS():
     import support.config
     result = True
 
     if result:
-        return jsonify({'success': True, 'message': 'Button Function Eight success.'}), 200
+        return jsonify({'success': True, 'message': 'Post Banks success.'}), 200
     
-    return jsonify({'success': False, 'message': 'Button Function Eight failure.'}), 400
+    return jsonify({'success': False, 'message': 'Post Banks failure.'}), 400
     
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: python3 app.py [sandbox|production]")
+    if len(sys.argv) != 1:
+        print("Usage: python3 app.py")
         sys.exit(1)
 
-    if sys.argv[1] not in ["sandbox", "production"]:
-        print("ERROR: Invalid command line argument ('sandbox' or 'production')")
-        sys.exit(1)
-
-    # global variable for mode from command line
+    # global variable for mode and dates (dropdown changeable)
     import support.config
-    support.config.env_mode = sys.argv[1]
+    support.config.env_mode = "sandbox"
+    support.config.begin_date = "2025-01-01"
+    support.config.end_date = "2025-01-31"
 
     # ngrok tunnel URL (will be set when tunnel is created)
     ngrok_url = None
@@ -210,10 +232,6 @@ if __name__ == '__main__':
 
     # dictionary for uploaded files
     support.config.files = {}
-
-    # beginning and end date (future will be set from dropdown)
-    support.config.begin_date = "2025-01-01"
-    support.config.end_date = "2025-03-31"
 
     # Validate global variables are properly set
     print(f"CHECKPOINT: Environment mode set to: {support.config.env_mode}")

@@ -1,10 +1,6 @@
 def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
-    if qbo_token is None:
-        print("ERROR: Missing qbo_token from environment")
-        return None
-
-    if qbo_account is None:
-        print("ERROR: Missing qbo_account from environment")
+    if qbo_token is None or qbo_account is None:
+        print("ERROR: Please set both your QBO token and account number in environment")
         return None
     
     from intuitlib.client import AuthClient
@@ -48,6 +44,7 @@ def connect_qbo(qbo_token=None, qbo_account=None, auth_code=None, realm_id=None,
         os.environ['QBO_REALM_ID'] = realm_id
             
         # Test the connection by fetching company info
+        from support.config import env_mode
         base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
         
         url = '{0}/v3/company/{1}/companyinfo/{1}'.format(base_url, auth_client.realm_id)

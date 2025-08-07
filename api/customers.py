@@ -19,7 +19,7 @@ def post_customers(files):
     customer_extraction = customer_file['df']
 
     # Concurrently post all customers from customers
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(customer_threadsafe, list(customer_extraction.values())), total=len(list(customer_extraction.keys()))))
 
     print("##############################_POSTC_END_##############################")
@@ -33,7 +33,7 @@ def single_customer(one_customer):
     import os, requests, time, random
 
     # Respectful delay to the server
-    time.sleep(random.uniform(0.3, 0.8))
+    time.sleep(random.uniform(0.8, 1.2))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -60,7 +60,8 @@ def single_customer(one_customer):
     }
 
     # QBO API endpoint for creating customers
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/customer?minorversion=75'
         
     headers = {

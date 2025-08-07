@@ -24,8 +24,8 @@ def get_database(query_mode=None):
     }
 
      # QBO API endpoint for querying customers
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f"{base_url}/v3/company/{realm_id}/query?query={allowed_queries[query_mode]}&minorversion=75"
         
     headers = {

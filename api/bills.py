@@ -54,11 +54,11 @@ def post_bills(files):
         transaction_amount = bill_extraction[key]['Amount']
         transaction_account = strip_nonabc(bill_extraction[key]['Account'])
 
-        if transaction_type not in ["bill", "check"]:
+        if transaction_type not in ["bill"]:
             bill_extraction.pop(key)
             continue
 
-        if transaction_date < "2025-01-01":
+        if transaction_date < "2025-02-01" or transaction_date > "2025-02-07":
             bill_extraction.pop(key)
             continue
 
@@ -73,11 +73,16 @@ def post_bills(files):
 
         for account_object in list(account_extraction.values()):
             if transaction_account == account_object['Old']:
-                qbo_account = account_object['Full']
+                qbo_account = account_object['Name']
+        
+        if qbo_account not in list(exp_id_mapping.keys()):
+            print(f"WARNING: Bill tied to account {bill_extraction[key]['Account']} does not exist in QBO")
+            bill_extraction.pop(key)
+            continue
         
         bill_extraction[key]['Exp_Id'] = exp_id_mapping[qbo_account]
 
-    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from 1/1/2025 onwards.")
+    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from 2/1/2025 to 2/7/2025")
 
     # Clean vendor names to best match
     from api.resolve import resolve_vendors
@@ -88,7 +93,7 @@ def post_bills(files):
     bill_extraction = resolve_vend_ids(bill_extraction)
 
     # Concurrently post all bills
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(bill_threadsafe, list(bill_extraction.values())), total=len(list(bill_extraction.keys()))))
     
     print("##############################_POSTB_END_##############################")
@@ -101,7 +106,7 @@ def single_bill(one_bill):
     import os, requests, time, random
 
     # Respectful delay to the server
-    time.sleep(random.uniform(0.3, 0.8))
+    time.sleep(random.uniform(0.8, 1.2))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -112,7 +117,7 @@ def single_bill(one_bill):
         return False
 
     if one_bill['Id'] is None:
-        print(f"ERROR: Missing Id for {one_bill['Name']}, Amount: ${one_bill['Credit']}")
+        print(f"ERROR: Missing Id for {one_bill['Name']}, Amount: ${one_bill['Amount']}")
         return False
             
     # Extract bill data
@@ -153,7 +158,8 @@ def single_bill(one_bill):
     }
 
     # QBO API endpoint for creating bills
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/bill?minorversion=75'
         
     headers = {

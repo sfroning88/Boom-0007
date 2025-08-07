@@ -104,8 +104,12 @@ def POST_CUSTOMERS():
 @app.route('/POST_INVOICES', methods=['POST'])
 def POST_INVOICES():
     import support.config
-    from api.invoices import post_invoices
-    result = post_invoices(support.config.files, support.config.begin_date, support.config.end_date)
+    from api.items import post_items
+    result = post_items(
+        files=support.config.files, 
+        begin_date=support.config.begin_date, 
+        end_date=support.config.end_date,
+        item_mode="invoice")
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Invoices success.'}), 200
@@ -128,8 +132,12 @@ def POST_VENDORS():
 @app.route('/POST_BILLS', methods=['POST'])
 def POST_BILLS():
     import support.config
-    from api.bills import post_bills
-    result = post_bills(support.config.files, support.config.begin_date, support.config.end_date)
+    from api.items import post_items
+    result = post_items(
+        files=support.config.files, 
+        begin_date=support.config.begin_date, 
+        end_date=support.config.end_date,
+        item_mode="bill")
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Bills success.'}), 200

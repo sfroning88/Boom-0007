@@ -1,4 +1,4 @@
-def post_invoices(files):
+def post_invoices(files, begin_date="2025-01-01", end_date="2025-06-31"):
     print("##############################_POSTI_BEGIN_##############################")
 
     import concurrent.futures
@@ -12,7 +12,7 @@ def post_invoices(files):
             break
 
     if journal_file_key is None:
-        print("WARNING: Missing journal file. Please upload file first.")
+        print("WARNING: Missing journal file, please upload file first")
         return False
 
     journal_file = files[journal_file_key]
@@ -24,12 +24,26 @@ def post_invoices(files):
         transaction_type = invoice_extraction[key]['Type']
         transaction_date = invoice_extraction[key]['Date']
         transaction_amount = invoice_extraction[key]['Amount']
-        if transaction_type.lower() == "invoice" and transaction_date >= "2025-01-01" and transaction_amount > 0:
+
+        if transaction_type not in ["invoice"]:
+            invoice_extraction.pop(key)
+            continue
+
+        if transaction_date < begin_date or transaction_date > end_date:
+            invoice_extraction.pop(key)
+            continue
+
+        if transaction_amount == 0.0:
+            invoice_extraction.pop(key)
+            continue
+
+
+        if transaction_type.lower() == "invoice" and transaction_date >= "" and transaction_amount > 0:
             continue
         else:
             invoice_extraction.pop(key)
 
-    print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post from 1/1/2025 onwards.")
+    print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post from {begin_date} to {end_date}")
 
     # Post all new customers from invoices
     from api.resolve import resolve_customers
@@ -100,8 +114,8 @@ def single_invoice(one_invoice):
     }
 
     # QBO API endpoint for creating invoices
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/invoice?minorversion=75'
         
     headers = {

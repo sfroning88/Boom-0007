@@ -58,7 +58,7 @@ def post_bills(files, begin_date="2025-01-01", end_date="2025-06-31"):
             bill_extraction.pop(key)
             continue
 
-        if transaction_date < "2025-02-01" or transaction_date > "2025-02-07":
+        if transaction_date < begin_date or transaction_date > end_date:
             bill_extraction.pop(key)
             continue
 

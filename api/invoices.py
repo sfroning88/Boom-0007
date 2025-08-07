@@ -1,4 +1,4 @@
-def post_invoices(files, begin_date="2025-01-01", end_date="2025-06-31"):
+def post_invoices(files, begin_date="2025-01-01", end_date="2025-01-31"):
     print("##############################_POSTI_BEGIN_##############################")
 
     import concurrent.futures
@@ -42,6 +42,9 @@ def post_invoices(files, begin_date="2025-01-01", end_date="2025-06-31"):
     # Post all new customers from invoices
     from api.resolve import resolve_customers
     invoice_extraction = resolve_customers(invoice_extraction)
+
+    if invoice_extraction is None:
+        return False
 
     # Assign ids pulled from QBO
     from api.resolve import resolve_cust_ids

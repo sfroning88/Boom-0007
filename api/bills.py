@@ -89,15 +89,18 @@ def post_bills(files, begin_date="2025-01-01", end_date="2025-01-31"):
     print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from {begin_date} to {end_date}")
 
     # Clean vendor names to best match
-    from api.resolve import resolve_vendors
-    bill_extraction = resolve_vendors(bill_extraction)
+    from api.resolve import resolve_objects
+    bill_extraction = resolve_objects(extraction=bill_extraction, object_mode="Vendor")
 
     if bill_extraction is None:
         return False
 
     # Assign ids pulled from QBO
-    from api.resolve import resolve_vend_ids
-    bill_extraction = resolve_vend_ids(bill_extraction)
+    from api.resolve import resolve_ids
+    bill_extraction = resolve_ids(extraction=bill_extraction, object_mode="Vendor")
+
+    if bill_extraction is None:
+        return False
 
     # Concurrently post all bills
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:

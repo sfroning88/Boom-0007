@@ -24,7 +24,8 @@ def get_database(query_mode=None):
     }
 
      # QBO API endpoint for querying customers
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f"{base_url}/v3/company/{realm_id}/query?query={allowed_queries[query_mode]}&minorversion=75"
         
     headers = {
@@ -35,7 +36,7 @@ def get_database(query_mode=None):
     response = requests.get(url, headers=headers)
         
     if response.status_code >= 300:
-        print(f"ERROR: Failed to retrieve {query_mode}s from QBO")
+        print(f"ERROR: Failed to retrieve {query_mode}s from QBO {response.text}")
         return None
 
     query_data = response.json()

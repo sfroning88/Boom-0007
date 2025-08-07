@@ -3,3 +3,4 @@ intuit-oauth
 pandas
 requests
 slugify
+ngrok

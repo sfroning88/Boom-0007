@@ -10,8 +10,8 @@ def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
     from intuitlib.client import AuthClient
     from intuitlib.enums import Scopes
 
-    # Generate OAuth authorization URL for user to authorize once
-    redirect_uri = "http://localhost:5000/oauth/callback"
+    # Use static ngrok domain for OAuth redirect URI
+    redirect_uri = "https://guiding-needlessly-mallard.ngrok-free.app/oauth/callback"
     auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment=env_mode)
     url = auth_client.get_authorization_url([Scopes.ACCOUNTING])
         
@@ -22,15 +22,15 @@ def get_oauth_url(qbo_token=None, qbo_account=None, env_mode="sandbox"):
     print("ERROR: Failed to generate OAuth URL")
     return None
 
-def connect_qbo(qbo_token=None, qbo_account=None, auth_code=None, realm_id=None):
+def connect_qbo(qbo_token=None, qbo_account=None, auth_code=None, realm_id=None, env_mode="sandbox"):
     print("##############################_QBO_BEGIN_##############################")
     
     import requests, os
     from intuitlib.client import AuthClient
 
-    # Complete QBO connection with auth code and store refresh token
-    redirect_uri = "http://localhost:5000/oauth/callback"
-    auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment="sandbox")
+    # Use static ngrok domain for OAuth redirect URI
+    redirect_uri = "https://guiding-needlessly-mallard.ngrok-free.app/oauth/callback"
+    auth_client = AuthClient(qbo_account, qbo_token, redirect_uri, environment=env_mode)
         
     if auth_code and realm_id:
         # Exchange auth code for bearer token and refresh token
@@ -48,7 +48,8 @@ def connect_qbo(qbo_token=None, qbo_account=None, auth_code=None, realm_id=None)
         os.environ['QBO_REALM_ID'] = realm_id
             
         # Test the connection by fetching company info
-        base_url = 'https://sandbox-quickbooks.api.intuit.com'
+        base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
+        
         url = '{0}/v3/company/{1}/companyinfo/{1}'.format(base_url, auth_client.realm_id)
         auth_header = 'Bearer {0}'.format(auth_client.access_token)
         headers = {

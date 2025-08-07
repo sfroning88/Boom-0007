@@ -25,7 +25,7 @@ def post_invoices(files, begin_date="2025-01-01", end_date="2025-06-31"):
         transaction_date = invoice_extraction[key]['Date']
         transaction_amount = invoice_extraction[key]['Amount']
 
-        if transaction_type not in ["invoice"]:
+        if transaction_type.lower() not in ["invoice"]:
             invoice_extraction.pop(key)
             continue
 
@@ -36,12 +36,6 @@ def post_invoices(files, begin_date="2025-01-01", end_date="2025-06-31"):
         if transaction_amount == 0.0:
             invoice_extraction.pop(key)
             continue
-
-
-        if transaction_type.lower() == "invoice" and transaction_date >= "" and transaction_amount > 0:
-            continue
-        else:
-            invoice_extraction.pop(key)
 
     print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post from {begin_date} to {end_date}")
 

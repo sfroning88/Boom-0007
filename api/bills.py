@@ -1,4 +1,4 @@
-def post_bills(files):
+def post_bills(files, begin_date="2025-01-01", end_date="2025-06-31"):
     print("##############################_POSTB_BEGIN_##############################")
 
     import concurrent.futures
@@ -12,7 +12,7 @@ def post_bills(files):
             break
 
     if journal_file_key is None:
-        print("WARNING: Missing journal file. Please upload file first.")
+        print("WARNING: Missing journal file, please upload file first")
         return False
 
     journal_file = files[journal_file_key]
@@ -82,7 +82,7 @@ def post_bills(files):
         
         bill_extraction[key]['Exp_Id'] = exp_id_mapping[qbo_account]
 
-    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from 2/1/2025 to 2/7/2025")
+    print(f"CHECKPOINT: Found {len(list(bill_extraction.keys()))} bills to post from {begin_date} to {end_date}")
 
     # Clean vendor names to best match
     from api.resolve import resolve_vendors
@@ -158,8 +158,8 @@ def single_bill(one_bill):
     }
 
     # QBO API endpoint for creating bills
-    base_url = 'https://quickbooks.api.intuit.com'
-    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    from support.config import env_mode
+    base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/bill?minorversion=75'
         
     headers = {

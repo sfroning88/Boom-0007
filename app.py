@@ -1,5 +1,6 @@
 import os, sys
 from flask import Flask, render_template, jsonify, request
+from ngrok import connect
 
 # create a Flask app
 app = Flask(__name__)
@@ -11,8 +12,14 @@ qbo_token = os.environ.get('QBO_API_KEY')
 # get Quickbooks Online account
 qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
 
+# get the Ngrok token
+ngrok_token = os.environ.get('NGROK_API_TOKEN')
+
 # dictionary for uploaded files
 files = {}
+
+# ngrok tunnel URL (will be set when tunnel is created)
+ngrok_url = None
 
 @app.route('/')
 def home():
@@ -23,7 +30,7 @@ def home():
 def CONNECT_QBO():
     # Generate OAuth URL for user to authorize once
     from api.connect import get_oauth_url
-    oauth_url = get_oauth_url(qbo_token, qbo_account)
+    oauth_url = get_oauth_url(qbo_token, qbo_account, env_mode="production")
         
     if oauth_url:
         return jsonify({'success': True, 'message': 'Redirecting to QBO authorization...', 'redirect_url': oauth_url}), 200
@@ -40,7 +47,7 @@ def oauth_callback():
         
     # Connect to QBO with the received auth code and store refresh token
     from api.connect import connect_qbo
-    success = connect_qbo(qbo_token, qbo_account, auth_code, realm_id)
+    success = connect_qbo(qbo_token, qbo_account, auth_code, realm_id, env_mode="production")
         
     if success:
         # Show success page that will update the main app
@@ -144,16 +151,43 @@ def POST_ACCOUNTS():
 
 @app.route('/BUTTON_FUNCTION_EIGHT', methods=['POST'])
 def BUTTON_FUNCTION_EIGHT():
-    try:
+    result = True
+
+    if result:
         return jsonify({'success': True, 'message': 'Button Function Eight success.'}), 200
     
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 400
+    return jsonify({'success': False, 'message': 'Button Function Eight failure.'}), 400
     
 if __name__ == '__main__':
     if len(sys.argv) != 1:
         print("Usage: python3 app.py")
         sys.exit(1)
 
-    # run the app
-    app.run(debug=True, port=5000)
+    # Check if ngrok is available and create tunnel
+    import importlib.util
+    ngrok_spec = importlib.util.find_spec("ngrok")
+    
+    if ngrok_spec is None:
+        print("ERROR: ngrok package not available")
+        sys.exit(1)
+
+    # Authenticate with ngrok using environment token
+    if ngrok_token is None:
+        print("ERROR: Please set your ngrok token")
+        sys.exit(1)
+    
+    from ngrok import set_auth_token
+    set_auth_token(ngrok_token)
+
+    from ngrok import connect
+    tunnel = connect(5000, domain="guiding-needlessly-mallard.ngrok-free.app")
+
+    if tunnel is None:
+        print("ERROR: Failed to connect to ngrok tunnel, terminate all instances")
+        sys.exit(1)
+
+    # Static domain is configured in api/connect.py
+    print(f"CHECKPOINT: Using static domain: https://guiding-needlessly-mallard.ngrok-free.app/oauth/callback")
+
+    # run the app on port 5000
+    app.run(port=5000)

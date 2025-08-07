@@ -19,7 +19,7 @@ def post_vendors(files):
     vendor_extraction = vendor_file['df']
 
     # Concurrently post all vendors from vendors
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(vendor_threadsafe, list(vendor_extraction.values())), total=len(list(vendor_extraction.keys()))))
 
     print("##############################_POSTV_END_##############################")
@@ -32,7 +32,7 @@ def single_vendor(one_vendor):
     import os, requests, time, random
 
     # Respectful delay to the server
-    time.sleep(random.uniform(0.3, 0.8))
+    time.sleep(random.uniform(0.8, 1.2))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -60,7 +60,8 @@ def single_vendor(one_vendor):
     }
 
     # QBO API endpoint for creating vendors
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/vendor?minorversion=75'
         
     headers = {

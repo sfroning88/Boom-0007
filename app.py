@@ -80,7 +80,7 @@ def UPLOAD_FILE():
                 pass
 
         if extracted is not None:
-            print(f"CHECKPOINT: File Code {code} processed successfully.")
+            print(f"CHECKPOINT: File Code {code} processed successfully")
             support.config.files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
 

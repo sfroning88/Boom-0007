@@ -6,20 +6,8 @@ from ngrok import connect
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
 
-# get Quickbooks Online token
-qbo_token = os.environ.get('QBO_API_KEY')
-
-# get Quickbooks Online account
-qbo_account = os.environ.get('QBO_ACCOUNT_NUMBER')
-
 # get the Ngrok token
 ngrok_token = os.environ.get('NGROK_API_TOKEN')
-
-# dictionary for uploaded files
-files = {}
-
-# ngrok tunnel URL (will be set when tunnel is created)
-ngrok_url = None
 
 @app.route('/')
 def home():
@@ -28,9 +16,11 @@ def home():
 # connecting first time to qbo for authorization
 @app.route('/CONNECT_QBO', methods=['POST'])
 def CONNECT_QBO():
+    import support.config
+
     # Generate OAuth URL for user to authorize once
     from api.connect import get_oauth_url
-    oauth_url = get_oauth_url(qbo_token, qbo_account, env_mode="production")
+    oauth_url = get_oauth_url(support.config.qbo_token, support.config.qbo_account, support.config.env_mode)
         
     if oauth_url:
         return jsonify({'success': True, 'message': 'Redirecting to QBO authorization...', 'redirect_url': oauth_url}), 200
@@ -39,6 +29,7 @@ def CONNECT_QBO():
 
 @app.route('/oauth/callback')
 def oauth_callback():
+    import support.config
     auth_code = request.args.get('code')
     realm_id = request.args.get('realmId')
         
@@ -47,7 +38,7 @@ def oauth_callback():
         
     # Connect to QBO with the received auth code and store refresh token
     from api.connect import connect_qbo
-    success = connect_qbo(qbo_token, qbo_account, auth_code, realm_id, env_mode="production")
+    success = connect_qbo(support.config.qbo_token, support.config.qbo_account, auth_code, realm_id, support.config.env_mode)
         
     if success:
         # Show success page that will update the main app
@@ -58,6 +49,7 @@ def oauth_callback():
 # uploading different QBD files
 @app.route('/UPLOAD_FILE', methods=['POST'])
 def UPLOAD_FILE():
+    import support.config
     from functions.extension import ALLOWED_EXTENSIONS, retrieve_extension
     from functions.generate import generate_code
     from functions.classify import classify_file
@@ -89,7 +81,7 @@ def UPLOAD_FILE():
 
         if extracted is not None:
             print(f"CHECKPOINT: File Code {code} processed successfully.")
-            files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
+            support.config.files[code] = {'name': file.filename, 'type': filetype, 'uploaded': False, 'df': extracted}
             return jsonify({'success': True, 'message': 'File upload success of type {filetype}.'}), 200
 
     print(f"WARNING: File was not processed or other data validation error")
@@ -98,8 +90,9 @@ def UPLOAD_FILE():
 # send customers over to QBD
 @app.route('/POST_CUSTOMERS', methods=['POST'])
 def POST_CUSTOMERS():
+    import support.config
     from api.customers import post_customers
-    result = post_customers(files)
+    result = post_customers(support.config.files)
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Customers success.'}), 200
@@ -109,8 +102,9 @@ def POST_CUSTOMERS():
 # send invoices over to QBD
 @app.route('/POST_INVOICES', methods=['POST'])
 def POST_INVOICES():
+    import support.config
     from api.invoices import post_invoices
-    result = post_invoices(files)
+    result = post_invoices(support.config.files, support.config.begin_date, support.config.end_date)
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Invoices success.'}), 200
@@ -120,8 +114,9 @@ def POST_INVOICES():
 # send vendors over to QBD
 @app.route('/POST_VENDORS', methods=['POST'])
 def POST_VENDORS():
+    import support.config
     from api.vendors import post_vendors
-    result = post_vendors(files)
+    result = post_vendors(support.config.files)
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Vendors success.'}), 200
@@ -131,8 +126,9 @@ def POST_VENDORS():
 # send bills over to QBD
 @app.route('/POST_BILLS', methods=['POST'])
 def POST_BILLS():
+    import support.config
     from api.bills import post_bills
-    result = post_bills(files)
+    result = post_bills(support.config.files, support.config.begin_date, support.config.end_date)
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Bills success.'}), 200
@@ -141,8 +137,9 @@ def POST_BILLS():
 
 @app.route('/POST_ACCOUNTS', methods=['POST'])
 def POST_ACCOUNTS():
+    import support.config
     from api.accounts import post_accounts
-    result = post_accounts(files)
+    result = post_accounts(support.config.files)
     
     if result:
         return jsonify({'success': True, 'message': 'Posting Accounts success'}), 200
@@ -151,6 +148,7 @@ def POST_ACCOUNTS():
 
 @app.route('/BUTTON_FUNCTION_EIGHT', methods=['POST'])
 def BUTTON_FUNCTION_EIGHT():
+    import support.config
     result = True
 
     if result:
@@ -159,9 +157,20 @@ def BUTTON_FUNCTION_EIGHT():
     return jsonify({'success': False, 'message': 'Button Function Eight failure.'}), 400
     
 if __name__ == '__main__':
-    if len(sys.argv) != 1:
-        print("Usage: python3 app.py")
+    if len(sys.argv) != 2:
+        print("Usage: python3 app.py [sandbox|production]")
         sys.exit(1)
+
+    if sys.argv[1] not in ["sandbox", "production"]:
+        print("ERROR: Invalid command line argument ('sandbox' or 'production')")
+        sys.exit(1)
+
+    # global variable for mode from command line
+    import support.config
+    support.config.env_mode = sys.argv[1]
+
+    # ngrok tunnel URL (will be set when tunnel is created)
+    ngrok_url = None
 
     # Check if ngrok is available and create tunnel
     import importlib.util
@@ -183,11 +192,37 @@ if __name__ == '__main__':
     tunnel = connect(5000, domain="guiding-needlessly-mallard.ngrok-free.app")
 
     if tunnel is None:
-        print("ERROR: Failed to connect to ngrok tunnel, terminate all instances")
+        print("ERROR: Failed to connect to ngrok tunnel, check active instances")
         sys.exit(1)
+
+    print("##############################_APP_BEGIN_##############################")
 
     # Static domain is configured in api/connect.py
     print(f"CHECKPOINT: Using static domain: https://guiding-needlessly-mallard.ngrok-free.app/oauth/callback")
 
+    # Collect quickbooks online token and account number
+    support.config.qbo_token = os.environ.get('QBO_PROD_TOKEN') if support.config.env_mode == "production" else os.environ.get('QBO_DEV_TOKEN')
+    support.config.qbo_account = os.environ.get('QBO_PROD_ACCOUNT') if support.config.env_mode == "production" else os.environ.get('QBO_DEV_ACCOUNT')
+   
+    if support.config.qbo_token is None or support.config.qbo_account is None:
+        print("ERROR: Please set both your QBO token and account number in environment")
+        sys.exit(1)
+
+    # dictionary for uploaded files
+    support.config.files = {}
+
+    # beginning and end date (future will be set from dropdown)
+    support.config.begin_date = "2025-02-01"
+    support.config.end_date = "2025-02-07"
+
+    # Validate global variables are properly set
+    print(f"CHECKPOINT: Environment mode set to: {support.config.env_mode}")
+    print(f"CHECKPOINT: QBO Token configured: {'Yes' if support.config.qbo_token else 'No'}")
+    print(f"CHECKPOINT: QBO Account configured: {'Yes' if support.config.qbo_account else 'No'}")
+    print(f"CHECKPOINT: Files dictionary initialized: {'Yes' if support.config.files is not None else 'No'}")
+    print(f"CHECKPOINT: Date range set: {support.config.begin_date} to {support.config.end_date}")
+
+
+    print("##############################_APP_END_##############################")
     # run the app on port 5000
     app.run(port=5000)

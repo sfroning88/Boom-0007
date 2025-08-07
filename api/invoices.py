@@ -40,7 +40,7 @@ def post_invoices(files):
     invoice_extraction = resolve_cust_ids(invoice_extraction)
     
     # Concurrently post all invoices
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(invoice_threadsafe, list(invoice_extraction.values())), total=len(list(invoice_extraction.keys()))))
     
     print("##############################_POSTI_END_##############################")
@@ -53,7 +53,7 @@ def single_invoice(one_invoice):
     import os, requests, time, random
 
     # Respectful delay to the server
-    time.sleep(random.uniform(0.3, 0.8))
+    time.sleep(random.uniform(0.8, 1.2))
         
     # Get OAuth tokens from environment or stored session
     access_token = os.environ.get('QBO_ACCESS_TOKEN')
@@ -68,6 +68,8 @@ def single_invoice(one_invoice):
         return False
             
     # Extract invoice data
+    invoice_name = one_invoice['Name']
+    invoice_id = one_invoice['Id']
     invoice_date = one_invoice['Date']
     invoice_number = one_invoice['Num']
     invoice_memo = one_invoice['Memo']
@@ -80,7 +82,7 @@ def single_invoice(one_invoice):
     # Create invoice object according to QBO API specification
     invoice = {
         "CustomerRef": {
-            "value": one_invoice['Id']
+            "value": invoice_id
         },
         "Line": [{
             "DetailType": "SalesItemLineDetail",
@@ -98,7 +100,8 @@ def single_invoice(one_invoice):
     }
 
     # QBO API endpoint for creating invoices
-    base_url = 'https://sandbox-quickbooks.api.intuit.com'
+    base_url = 'https://quickbooks.api.intuit.com'
+    #base_url = 'https://sandbox-quickbooks.api.intuit.com'
     url = f'{base_url}/v3/company/{realm_id}/invoice?minorversion=75'
         
     headers = {
@@ -110,8 +113,8 @@ def single_invoice(one_invoice):
     response = requests.post(url, json=invoice, headers=headers)
         
     if response.status_code >= 300:
-        print(f"ERROR: Failed to create invoice for {one_invoice['Name']}, Amount: ${invoice_amount}")
+        print(f"ERROR: Failed to create invoice for {invoice_name}, Amount: ${invoice_amount}")
         return False
         
-    #print(f"INVOICE: Posting invoice for {one_invoice['Name']}, Amount: ${invoice_amount}")
+    #print(f"INVOICE: Posting invoice for {invoice_name}, Amount: ${invoice_amount}")
     return True

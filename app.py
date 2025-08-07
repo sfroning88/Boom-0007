@@ -222,7 +222,6 @@ if __name__ == '__main__':
     print(f"CHECKPOINT: Files dictionary initialized: {'Yes' if support.config.files is not None else 'No'}")
     print(f"CHECKPOINT: Date range set: {support.config.begin_date} to {support.config.end_date}")
 
-
     print("##############################_APP_END_##############################")
     # run the app on port 5000
     app.run(port=5000)

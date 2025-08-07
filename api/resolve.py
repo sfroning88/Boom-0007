@@ -43,7 +43,7 @@ def resolve_customers(invoices_extracted):
 
     # Concurrently post all customers from customers
     from api.customers import customer_threadsafe
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(customer_threadsafe, customers_added), total=len(customers_added)))
 
     return invoices_extracted
@@ -115,7 +115,7 @@ def resolve_vendors(bills_extracted):
 
     # Concurrently post all vendors from vendors
     from api.vendors import vendor_threadsafe
-    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         list(tqdm(executor.map(vendor_threadsafe, vendors_added), total=len(vendors_added)))
 
     return bills_extracted

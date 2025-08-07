@@ -40,15 +40,18 @@ def post_invoices(files, begin_date="2025-01-01", end_date="2025-01-31"):
     print(f"CHECKPOINT: Found {len(list(invoice_extraction.keys()))} invoices to post from {begin_date} to {end_date}")
 
     # Post all new customers from invoices
-    from api.resolve import resolve_customers
-    invoice_extraction = resolve_customers(invoice_extraction)
+    from api.resolve import resolve_objects
+    invoice_extraction = resolve_objects(extraction=invoice_extraction, object_mode="Customer")
 
     if invoice_extraction is None:
         return False
 
     # Assign ids pulled from QBO
-    from api.resolve import resolve_cust_ids
-    invoice_extraction = resolve_cust_ids(invoice_extraction)
+    from api.resolve import resolve_ids
+    invoice_extraction = resolve_ids(extraction=invoice_extraction, object_mode="Customer")
+
+    if invoice_extraction is None:
+        return False
     
     # Concurrently post all invoices
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:

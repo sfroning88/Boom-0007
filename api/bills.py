@@ -1,4 +1,4 @@
-def post_bills(files, begin_date="2025-01-01", end_date="2025-06-31"):
+def post_bills(files, begin_date="2025-01-01", end_date="2025-01-31"):
     print("##############################_POSTB_BEGIN_##############################")
 
     import concurrent.futures
@@ -39,7 +39,11 @@ def post_bills(files, begin_date="2025-01-01", end_date="2025-06-31"):
     # Collect the expense account ids
     from api.retrieve import get_database
     accounts_pre = get_database(query_mode="Account")
-    accounts_post = accounts_pre['Account']
+    if accounts_pre is None or 'Account' not in list(accounts_pre.keys()):
+        print("WARNING: Please upload Chart of Accounts to QBO before posting bills")
+        return False
+
+    accounts_post = accounts_pre['Account'] if accounts_pre is not None else None
 
     exp_id_mapping = {}
     for account_object in accounts_post:
@@ -87,6 +91,9 @@ def post_bills(files, begin_date="2025-01-01", end_date="2025-06-31"):
     # Clean vendor names to best match
     from api.resolve import resolve_vendors
     bill_extraction = resolve_vendors(bill_extraction)
+
+    if bill_extraction is None:
+        return False
 
     # Assign ids pulled from QBO
     from api.resolve import resolve_vend_ids

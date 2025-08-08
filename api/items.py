@@ -157,7 +157,7 @@ def post_one(one_item):
     item_due_date = days_timestamp(item_date, 30)
 
     if item_mode == "invoice":
-        item = {
+        item_payload = {
         "CustomerRef": {
             "value": item_id
         },
@@ -181,7 +181,7 @@ def post_one(one_item):
         item_exp_id = one_item['Exp_Id']
 
         # Create bill object according to QBO API specification
-        item = {
+        item_payload = {
             "VendorRef": {
                 "value": item_id
             },
@@ -214,7 +214,7 @@ def post_one(one_item):
         'Accept': 'application/json'
     }
         
-    response = requests.post(url, json=item, headers=headers)
+    response = requests.post(url, json=item_payload, headers=headers)
         
     if response.status_code >= 300:
         print(f"ERROR: Failed to create {item_mode} for {item_name}, Amount: ${item_amount}")

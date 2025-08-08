@@ -34,8 +34,7 @@ def extract_vendors(file, exte):
 
     first_vendor_key = list(extracted.keys())[0]
     first_vendor = extracted[first_vendor_key]
-    print(f"CHECKPOINT: {first_vendor_key} accesses {first_vendor['Vendor']}")
+    print(f"CHECKPOINT: First key accesses {first_vendor['Vendor']}")
 
     print("##############################_EXTRV_END_##############################")
     return extracted
-

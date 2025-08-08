@@ -61,6 +61,17 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
         for account_object in accounts_post:
             exp_id_mapping[account_object['Name']] = account_object['Id']
 
+        # Collect the expense customer ids
+        customers_pre = get_database(query_mode="Customer")
+        if customers_pre is None or 'Customer' not in list(customers_pre.keys()):
+            print("WARNING: Please upload project Customers to QBO before posting bills")
+            return False
+
+        customers_post = customers_pre['Customer'] if customers_pre is not None else None
+        cust_id_mapping = {}
+        for customer_object in customers_post:
+            cust_id_mapping[customer_object['DisplayName']] = customer_object['Id']
+
     # Remove any non item transactions or older transactions
     from support.stripping import strip_nonabc
     item_extraction = journal_extraction.copy()
@@ -85,19 +96,24 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
             transaction_account = strip_nonabc(item_extraction[key]['Account'])
             if transaction_account not in account_olds:
                 print(f"WARNING: Bill tied to account {item_extraction[key]['Account']} does not exist in Chart of Accounts")
-                item_extraction.pop(key)
-                continue
-
-            for account_object in list(account_extraction.values()):
-                if transaction_account == account_object['Old']:
-                    qbo_account = account_object['Account']
+                qbo_account = "Uncategorized Expense"
+            else:
+                for account_object in list(account_extraction.values()):
+                    if transaction_account == account_object['Old']:
+                        qbo_account = account_object['Account']
         
-            if qbo_account not in list(exp_id_mapping.keys()):
+            if qbo_account in list(exp_id_mapping.keys()):
+                item_extraction[key]['Exp_Id'] = exp_id_mapping[qbo_account]
+            else:
                 print(f"WARNING: Bill tied to account {item_extraction[key]['Account']} does not exist in QBO")
-                item_extraction.pop(key)
-                continue
-        
-            item_extraction[key]['Exp_Id'] = exp_id_mapping[qbo_account]
+                item_extraction[key]['Exp_Id'] = exp_id_mapping["Uncategorized Expense"]
+
+            transaction_bill_customer = item_extraction[key]['Bill Customer']
+            if transaction_bill_customer in list(cust_id_mapping.keys()):
+                item_extraction[key]['Bill Customer Id'] = cust_id_mapping[transaction_bill_customer]
+            elif transaction_bill_customer is not None:
+                print(f"WARNING: Bill tied to customer {transaction_bill_customer} does not exist in QBO")
+                item_extraction[key]['Bill Customer'] = None
 
     print(f"CHECKPOINT: Found {len(list(item_extraction.keys()))} {item_mode}s to post from {begin_date} to {end_date}")
 
@@ -167,19 +183,21 @@ def post_one(one_item):
                 "SalesItemLineDetail": {
                     "ServiceDate": item_date
                 },
-                "Amount": item_amount,
-                "Description": item_memo if item_memo else "Invoice line item"
+                "Amount": item_amount
             }],
             "TotalAmt": item_amount,
             "TxnDate": item_date,
             "DueDate": item_due_date if item_due_date else item_date,
             "DocNumber": item_number,
-            "PrivateNote": item_memo if item_memo else "Uncategorized Income"
+            "PrivateNote": item_memo if item_memo else "Invoice from QBD"
         }
     
     elif item_mode == "bill":
         item_account = one_item['Account']
         item_exp_id = one_item['Exp_Id']
+
+        item_customer = one_item['Bill Customer']
+        item_customer_id = one_item['Bill Customer Id']
 
         # Create bill object according to QBO API specification
         item_payload = {
@@ -190,18 +208,21 @@ def post_one(one_item):
                 "DetailType": "AccountBasedExpenseLineDetail",
                 "AccountBasedExpenseLineDetail": {
                     "AccountRef": {
-                    "value": item_exp_id,
-                    "name": item_account
+                        "value": item_exp_id,
+                        "name": item_account,
+                    },
+                    "CustomerRef": {
+                        "name": item_customer,
+                        "value": item_customer_id
                     }
                 },
                 "Amount": item_amount,
-                "Description": item_memo if item_memo else "Uncategorized Expense"
             }],
             "TotalAmt": item_amount,
             "TxnDate": item_date,
             "DueDate": item_due_date if item_due_date else item_date,
             "DocNumber": item_number,
-            "PrivateNote": item_memo if item_memo else "Uncategorized Expense"
+            "PrivateNote": item_memo if item_memo else "Bill from QBD"
         }
 
     # QBO API endpoint for creating items

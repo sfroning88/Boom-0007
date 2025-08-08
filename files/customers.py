@@ -33,7 +33,7 @@ def extract_customers(file, exte):
 
     first_customer_key = list(extracted.keys())[0]
     first_customer = extracted[first_customer_key]
-    print(f"CHECKPOINT: {first_customer_key} accesses {first_customer['Customer']}")
+    print(f"CHECKPOINT: First key accesses {first_customer['Customer']}")
 
     print("##############################_EXTRC_END_##############################")
     return extracted

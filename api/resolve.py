@@ -41,7 +41,6 @@ def resolve_objects(extracted=None, object_mode=None):
 
     objects_added = []
     for new_name in objects_new:
-
         if object_mode == "Customer":
             # Create dummy customer object and add to database
             dummy_customer = {

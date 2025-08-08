@@ -14,6 +14,29 @@ def home():
     # Render base home template
     return render_template('chat.html')
 
+@app.route('/SET_GLOBAL_VARS', methods=['POST'])
+def SET_GLOBAL_VARS():
+    import support.config
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    env_mode = data.get('env_mode')
+    begin_date = data.get('begin_date')
+    end_date = data.get('end_date')
+    
+    if env_mode and env_mode in ['sandbox', 'production']:
+        support.config.env_mode = env_mode
+    
+    if begin_date:
+        support.config.begin_date = begin_date
+    
+    if end_date:
+        support.config.end_date = end_date
+    
+    return jsonify({'success': True, 'message': 'Global variables updated successfully'}), 200
+
 # connecting first time to qbo for authorization
 @app.route('/CONNECT_QBO', methods=['POST'])
 def CONNECT_QBO():
@@ -92,8 +115,10 @@ def UPLOAD_FILE():
 @app.route('/POST_CUSTOMERS', methods=['POST'])
 def POST_CUSTOMERS():
     import support.config
-    from api.customers import post_customers
-    result = post_customers(support.config.files)
+    from api.objects import post_objects
+    result = post_objects(
+        files=support.config.files, 
+        object_mode="customer")
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Customers success.'}), 200
@@ -120,8 +145,10 @@ def POST_INVOICES():
 @app.route('/POST_VENDORS', methods=['POST'])
 def POST_VENDORS():
     import support.config
-    from api.vendors import post_vendors
-    result = post_vendors(support.config.files)
+    from api.objects import post_objects
+    result = post_objects(
+        files=support.config.files, 
+        object_mode="vendor")
 
     if result:
         return jsonify({'success': True, 'message': 'Posting Vendors success.'}), 200
@@ -147,36 +174,15 @@ def POST_BILLS():
 @app.route('/POST_ACCOUNTS', methods=['POST'])
 def POST_ACCOUNTS():
     import support.config
-    from api.accounts import post_accounts
-    result = post_accounts(support.config.files)
+    from api.objects import post_objects
+    result = post_objects(
+        files=support.config.files, 
+        object_mode="account")
     
     if result:
         return jsonify({'success': True, 'message': 'Posting Accounts success'}), 200
     
     return jsonify({'success': False, 'message': 'Posting Accounts failed.'}), 400
-
-@app.route('/SET_GLOBAL_VARS', methods=['POST'])
-def SET_GLOBAL_VARS():
-    import support.config
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({'success': False, 'message': 'No data provided'}), 400
-    
-    env_mode = data.get('env_mode')
-    begin_date = data.get('begin_date')
-    end_date = data.get('end_date')
-    
-    if env_mode and env_mode in ['sandbox', 'production']:
-        support.config.env_mode = env_mode
-    
-    if begin_date:
-        support.config.begin_date = begin_date
-    
-    if end_date:
-        support.config.end_date = end_date
-    
-    return jsonify({'success': True, 'message': 'Global variables updated successfully'}), 200
 
 @app.route('/POST_BANKS', methods=['POST'])
 def POST_BANKS():

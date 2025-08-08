@@ -89,16 +89,16 @@ def UPLOAD_FILE():
 
         match filetype:
             case "journal":
-                from functions.journals import extract_journals
+                from files.journals import extract_journals
                 extracted = extract_journals(file, exte)
             case "customer":
-                from functions.customers import extract_customers
+                from files.customers import extract_customers
                 extracted = extract_customers(file, exte)
             case "vendor":
-                from functions.vendors import extract_vendors
+                from files.vendors import extract_vendors
                 extracted = extract_vendors(file, exte)
             case "account":
-                from functions.accounts import extract_accounts
+                from files.accounts import extract_accounts
                 extracted = extract_accounts(file, exte)
             case _:
                 pass

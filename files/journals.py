@@ -49,6 +49,8 @@ def extract_journals(file, exte):
                 'Num': str(row.iloc[7]).strip() if pd.notna(row.iloc[7]) else None,
                 'Name': str(str(row.iloc[9])) if pd.notna(row.iloc[9]) else "UNDEFINED NAME",
                 'Memo': str(row.iloc[11]).strip() if pd.notna(row.iloc[11]) else None,
+                'Bill Customer': None,
+                'Bill Customer Id': None,
                 'Id': None,
                 'Exp Id': None
             }
@@ -71,6 +73,12 @@ def extract_journals(file, exte):
                     credit_value = float(row.iloc[17])
                 
                 amount = max(debit_value, credit_value)
+
+                if pd.notna(row.iloc[9]) and str(row.iloc[9]).strip() != "":
+                    bill_customer_name = str(row.iloc[9]) if str(row.iloc[9]) != current_transaction_header['Name'] else None
+
+                if pd.notna(row.iloc[11]) and str(row.iloc[11]).strip() != "":
+                    updated_memo = str(row.iloc[11]) if current_transaction_header['Memo'] is None else current_transaction_header['Memo']
                 
                 # Create transaction object for this line item
                 transaction = {
@@ -79,11 +87,13 @@ def extract_journals(file, exte):
                     'Date': current_transaction_header['Date'],
                     'Num': current_transaction_header['Num'],
                     'Name': current_transaction_header['Name'],
-                    'Memo': current_transaction_header['Memo'],
+                    'Memo': updated_memo,
                     'Account': account_name,
                     'Amount': round(amount, 2),
-                    'Id': current_transaction_header['Id'],
-                    'Exp Id': current_transaction_header['Exp Id']
+                    'Bill Customer': bill_customer_name,
+                    'Bill Customer Id': None,
+                    'Id': None,
+                    'Exp Id': None
                 }
                 
                 extracted[transaction_counter] = transaction
@@ -98,6 +108,6 @@ def extract_journals(file, exte):
         print(f"WARNING: No transactions were found from the journal file or data validation error")
         return None
     
-    print(f"CHECKPOINT: 0 accesses {first_transaction['Type']} for {first_transaction['Name']}")
+    print(f"CHECKPOINT: First key accesses {first_transaction['Type']} for {first_transaction['Name']}")
     print("##############################_EXTRJ_END_##############################")
     return extracted

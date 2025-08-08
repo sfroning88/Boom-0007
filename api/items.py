@@ -62,7 +62,7 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
             exp_id_mapping[account_object['Name']] = account_object['Id']
 
     # Remove any non item transactions or older transactions
-    from functions.stripping import strip_nonabc
+    from support.stripping import strip_nonabc
     item_extraction = journal_extraction.copy()
     for key in list(item_extraction.keys()):
         transaction_type = item_extraction[key]['Type'].lower()
@@ -90,7 +90,7 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
 
             for account_object in list(account_extraction.values()):
                 if transaction_account == account_object['Old']:
-                    qbo_account = account_object['Name']
+                    qbo_account = account_object['Account']
         
             if qbo_account not in list(exp_id_mapping.keys()):
                 print(f"WARNING: Bill tied to account {item_extraction[key]['Account']} does not exist in QBO")
@@ -104,14 +104,14 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
     # Clean object names to best match
     from api.resolve import resolve_objects
     object_mode = "Vendor" if item_mode == "bill" else "Customer"
-    item_extraction = resolve_objects(extraction=item_extraction, object_mode=object_mode)
+    item_extraction = resolve_objects(extracted=item_extraction, object_mode=object_mode)
 
     if item_extraction is None:
         return False
 
     # Assign ids pulled from QBO
     from api.resolve import resolve_ids
-    item_extraction = resolve_ids(extraction=item_extraction, object_mode=object_mode)
+    item_extraction = resolve_ids(extracted=item_extraction, object_mode=object_mode)
 
     if item_extraction is None:
         return False
@@ -153,7 +153,7 @@ def post_one(one_item):
     item_amount = one_item['Amount']
 
      # net 30 terms default
-    from functions.stripping import days_timestamp
+    from support.stripping import days_timestamp
     item_due_date = days_timestamp(item_date, 30)
 
     if item_mode == "invoice":

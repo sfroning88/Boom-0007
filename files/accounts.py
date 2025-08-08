@@ -17,7 +17,7 @@ def extract_accounts(file, exte):
     # Extract vendors
     account_counter = 0
 
-    from functions.stripping import strip_nonabc
+    from support.stripping import strip_nonabc
     for i in range(len(df)):
         row = df.iloc[i]
         

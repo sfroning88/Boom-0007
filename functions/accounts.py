@@ -24,10 +24,10 @@ def extract_accounts(file, exte):
         current_account = {
             'Old': strip_nonabc(row.iloc[0]) if pd.notna(row.iloc[0]) else None,
             'Num': int(row.iloc[1]) if pd.notna(row.iloc[1]) else None,
-            'Name': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
+            'Account': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
         }
 
-        current_account['Full'] = str(current_account['Num']) + " " + current_account['Name'] if 'Num' is not None and 'Name' is not None else None
+        current_account['Full'] = str(current_account['Num']) + " " + current_account['Account'] if 'Num' is not None and 'Account' is not None else None
 
         extracted[account_counter] = current_account
         account_counter += 1

@@ -67,15 +67,9 @@ def resolve_objects(extracted=None, object_mode=None):
     print(f"CHECKPOINT: Found {len(objects_added)} new {object_mode}s to add")
 
     # Concurrently post all objects
-    if object_mode == "Customer":
-        from api.customers import customer_threadsafe
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            list(tqdm(executor.map(customer_threadsafe, objects_added), total=len(objects_added)))
-
-    elif object_mode == "Vendor":
-        from api.vendors import vendor_threadsafe
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            list(tqdm(executor.map(customer_threadsafe, objects_added), total=len(objects_added)))
+    from api.objects import object_threadsafe
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        list(tqdm(executor.map(object_threadsafe, objects_added), total=len(objects_added)))
 
     return extracted
 

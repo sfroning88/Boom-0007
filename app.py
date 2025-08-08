@@ -74,9 +74,9 @@ def oauth_callback():
 @app.route('/UPLOAD_FILE', methods=['POST'])
 def UPLOAD_FILE():
     import support.config
-    from functions.extension import ALLOWED_EXTENSIONS, retrieve_extension
-    from functions.generate import generate_code
-    from functions.classify import classify_file
+    from files.classify import classify_file
+    from support.extension import ALLOWED_EXTENSIONS, retrieve_extension
+    from support.generate import generate_code
         
     file = request.files.get('file')
     if not file:

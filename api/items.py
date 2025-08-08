@@ -5,11 +5,11 @@ def post_items(files=None, begin_date="2025-01-01", end_date="2025-01-31", item_
         return False
     
     if item_mode is None:
-        print("ERROR: No item mode was passed into resolve function")
+        print("ERROR: No item mode was passed into posting function")
         return False
 
     if item_mode not in ["invoice", "bill"]:
-        print("ERROR: Incorrect enum mode passed into resolve function")
+        print("ERROR: Incorrect enum mode passed into posting function")
         return False
 
     import concurrent.futures

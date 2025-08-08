@@ -157,24 +157,25 @@ def post_one(one_item):
     item_due_date = days_timestamp(item_date, 30)
 
     if item_mode == "invoice":
+        # Create invoice object according to QBO API specification
         item_payload = {
-        "CustomerRef": {
-            "value": item_id
-        },
-        "Line": [{
-            "DetailType": "SalesItemLineDetail",
-            "SalesItemLineDetail": {
-                "ServiceDate": item_date
+            "CustomerRef": {
+                "value": item_id
             },
-            "Amount": item_amount,
-            "Description": item_memo if item_memo else "Invoice line item"
-        }],
-        "TotalAmt": item_amount,
-        "TxnDate": item_date,
-        "DueDate": item_due_date if item_due_date else item_date,
-        "DocNumber": item_number,
-        "PrivateNote": item_memo if item_memo else "Uncategorized Income"
-    }
+            "Line": [{
+                "DetailType": "SalesItemLineDetail",
+                "SalesItemLineDetail": {
+                    "ServiceDate": item_date
+                },
+                "Amount": item_amount,
+                "Description": item_memo if item_memo else "Invoice line item"
+            }],
+            "TotalAmt": item_amount,
+            "TxnDate": item_date,
+            "DueDate": item_due_date if item_due_date else item_date,
+            "DocNumber": item_number,
+            "PrivateNote": item_memo if item_memo else "Uncategorized Income"
+        }
     
     elif item_mode == "bill":
         item_account = one_item['Account']

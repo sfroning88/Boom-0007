@@ -41,7 +41,7 @@ def extract_journals(file, exte):
         # Check if this is the first row of a new transaction
         if is_first_row(row):
             # Start new transaction header
-            from functions.stripping import strip_timestamp
+            from support.stripping import strip_timestamp
             current_transaction_header = {
                 'Trans #': str(int(row.iloc[1])).strip() if pd.notna(row.iloc[1]) else None,
                 'Type': str(row.iloc[3]).strip() if pd.notna(row.iloc[3]) else None,

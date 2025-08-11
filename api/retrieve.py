@@ -5,7 +5,7 @@ def get_database(query_mode=None):
         print("ERROR: Database failed to provide type for argument")
         return None
 
-    if query_mode not in ["Customer", "Vendor", "Account"]:
+    if query_mode not in ["Customer", "Vendor", "Account", "Invoice"]:
         print("ERROR: Database provided wrong enum for argument")
         return None
 
@@ -20,7 +20,8 @@ def get_database(query_mode=None):
     allowed_queries = {
         "Customer": "select DisplayName, Id FROM Customer MAXRESULTS 1000",
         "Vendor": "select DisplayName, Id FROM Vendor MAXRESULTS 1000",
-        "Account": "select Name, Id, AccountType FROM Account MAXRESULTS 1000"
+        "Account": "select Name, Id, AccountType FROM Account MAXRESULTS 1000",
+        "Invoice": "select * FROM Invoice MAXRESULTS 1000"
     }
 
      # QBO API endpoint for querying customers

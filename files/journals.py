@@ -30,6 +30,43 @@ def extract_journals(file, exte):
     
     num_rows, num_cols = df.shape
 
+    ####################################################################
+    """STURDI IRON SPECIFIC CODE"""
+    # assign to all transactions the one revenue account we use
+    from api.retrieve import get_database
+    pre_object = get_database(query_mode="Account")
+    
+    if pre_object is None or 'Account' not in list(pre_object.keys()):
+        print(f"WARNING: Please create Revenue account in QBO before posting uploading journal file")
+        return None
+
+    post_object = pre_object['Account']
+
+    for single_object in post_object:
+        if single_object['Name'] == "Revenue - Structural Steel":
+            rev_id_universal = single_object['Id']
+            print(f"CHECKPOINT: Determined structural steel account has id of {rev_id_universal}")
+
+    pre_object = get_database(query_mode="Invoice")
+    
+    if pre_object is None or 'Invoice' not in list(pre_object.keys()):
+        print(f"WARNING: Please create one test invoice in QBO before posting uploading journal file")
+        return None
+    
+    post_object = pre_object['Invoice']
+
+    for single_object in post_object:
+        if single_object['TxnDate'] >= "2025-08-01":
+            sales_object = single_object['Line'][0]
+            if 'SalesItemLineDetail' in list(sales_object.keys()):
+                item_object = sales_object['SalesItemLineDetail']
+                if 'ItemRef' in list(item_object.keys()):
+                    ref_object = item_object['ItemRef']
+                    if "Services - Structural Steel" == ref_object['name']:
+                        sales_id_universal = ref_object['value']
+                        print(f"CHECKPOINT: Determined structural steel services has id of {sales_id_universal}")
+    ####################################################################
+
     # Extract transactions
     transaction_counter = 0
     current_transaction_header = None

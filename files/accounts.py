@@ -27,7 +27,10 @@ def extract_accounts(file, exte):
             'Account': str(row.iloc[2]) if pd.notna(row.iloc[2]) else None,
         }
 
+        # BUGFIX(prod): Check values, not literal keys.
         current_account['Full'] = str(current_account['Num']) + " " + current_account['Account'] if 'Num' is not None and 'Account' is not None else None
+
+        # TODO(prod): Switch to header-based parsing; validate schema and types with clear error messages.
 
         extracted[account_counter] = current_account
         account_counter += 1

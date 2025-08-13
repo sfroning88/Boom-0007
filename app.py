@@ -3,8 +3,13 @@ from flask import Flask, render_template, jsonify, request
 from ngrok import connect
 
 # create a Flask app
+# create a Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')  # TODO(prod): require via env; no default; rotate regularly.
+
+# TODO(prod): Replace print with structured logging (json) across app; add request IDs/correlation IDs.
+# TODO(prod): Add authentication/authorization for all POST routes (admin-only).
+# TODO(prod): Move runtime configuration to a settings module (pydantic/dotenv) and remove hardcoded domains.
 
 # get the Ngrok token
 ngrok_token = os.environ.get('NGROK_API_TOKEN')
@@ -15,9 +20,12 @@ def home():
     return render_template('chat.html')
 
 @app.route('/SET_GLOBAL_VARS', methods=['POST'])
+@app.route('/SET_GLOBAL_VARS', methods=['POST'])
 def SET_GLOBAL_VARS():
     import support.config
     data = request.get_json()
+    # TODO(prod): Validate payload with schema (pydantic); enforce date formats; begin_date <= end_date.
+    # TODO(prod): Persist per-user/per-client in DB, not module globals; avoid cross-user bleed in multi-worker.
     
     if not data:
         return jsonify({'success': False, 'message': 'No data provided'}), 400
@@ -42,7 +50,9 @@ def SET_GLOBAL_VARS():
 def CONNECT_QBO():
     import support.config
 
-    # Generate OAuth URL for user to authorize once
+    # TODO(prod): Generate OAuth 'state' and persist in session/DB; pass to get_oauth_url; validate on callback.
+    # TODO(prod): Read redirect_uri and env_mode from centralized settings.
+
     from api.connect import get_oauth_url
     oauth_url = get_oauth_url(support.config.qbo_token, support.config.qbo_account, support.config.env_mode)
         
@@ -56,13 +66,16 @@ def oauth_callback():
     import support.config
     auth_code = request.args.get('code')
     realm_id = request.args.get('realmId')
-        
+    # TODO(prod): Read 'state' and validate against stored value; reject if mismatch; clear one-time state.
+
     if not auth_code or not realm_id:
         return jsonify({'success': False, 'message': 'Missing authorization code or realm ID'}), 400
         
     # Connect to QBO with the received auth code and store refresh token
     from api.connect import connect_qbo
     success = connect_qbo(support.config.qbo_token, support.config.qbo_account, auth_code, realm_id, support.config.env_mode)
+
+    # TODO(prod): On success, persist tokens to DB; do not keep in env; schedule refresh before expiry; mask tokens in logs.
         
     if success:
         # Show success page that will update the main app
@@ -193,11 +206,17 @@ def POST_BANKS():
         return jsonify({'success': True, 'message': 'Post Banks success.'}), 200
     
     return jsonify({'success': False, 'message': 'Post Banks failure.'}), 400
+
     
+
 if __name__ == '__main__':
     if len(sys.argv) != 1:
         print("Usage: python3 app.py")
         sys.exit(1)
+
+    # TODO(prod): Do not rely on ngrok in production; remove hardcoded domain. Use reverse proxy/ingress with TLS.
+    # TODO(prod): Fail fast if required env vars missing; do not print secrets; use proper logger.
+    # TODO(prod): Serve on 0.0.0.0 and port from env in containerized envs.
 
     # global variable for mode and dates (dropdown changeable)
     import support.config
@@ -211,9 +230,11 @@ if __name__ == '__main__':
     # Check if ngrok is available and create tunnel
     import importlib.util
     ngrok_spec = importlib.util.find_spec("ngrok")
+    # TODO(prod): Only enable ngrok in local dev; guard under ENV_MODE == 'dev'.
     
-    if ngrok_spec is None:
-        print("ERROR: ngrok package not available")
+    # Authenticate with ngrok using environment token
+    if ngrok_token is None:
+        print("ERROR: Please set your ngrok token")  # TODO(prod): local dev only; remove in prod.
         sys.exit(1)
 
     # Authenticate with ngrok using environment token
@@ -225,7 +246,10 @@ if __name__ == '__main__':
     set_auth_token(ngrok_token)
 
     from ngrok import connect
-    tunnel = connect(5000, domain="guiding-needlessly-mallard.ngrok-free.app")
+    tunnel = connect(5000, domain="guiding-needlessly-mallard.ngrok-free.app")  # TODO(prod): remove hardcoded domain; config/env.
+
+    # Collect quickbooks online token and account number
+    # TODO(prod): Use QBO_CLIENT_ID/SECRET and QBO_REDIRECT_URI; do not store dynamic tokens in env.
 
     if tunnel is None:
         print("ERROR: Failed to connect to ngrok tunnel, check active instances")

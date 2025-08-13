@@ -1,4 +1,6 @@
 def resolve_objects(extracted=None, object_mode=None):
+        # TODO(prod): Add preview/confirm workflow before creating placeholder objects; write an audit log entry per creation.
+    # TODO(prod): Use fuzzy matching with thresholds and allow manual override mapping to existing objects.
     if extracted is None or object_mode is None:
         print("ERROR: No object or mode was passed into resolve function")
         return None
@@ -73,6 +75,8 @@ def resolve_objects(extracted=None, object_mode=None):
     return extracted
 
 def resolve_ids(extracted=None, object_mode=None):
+     # TODO(prod): Handle duplicates and collisions; when multiple candidates, require explicit mapping instead of silent pick.
+
     if extracted is None or object_mode is None:
         print("ERROR: No object or mode was passed into resolve function")
         return None

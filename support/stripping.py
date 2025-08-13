@@ -1,7 +1,7 @@
 def strip_nonabc(input_string):
     if not isinstance(input_string, str) or input_string is None:
         return ""
-
+    # TODO(prod): Keep digits and normalize spaces/punct; consider slugify with safe rules.
     output_string = ''.join(c for c in input_string if c.isalpha())
     return output_string.lower()
 

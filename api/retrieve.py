@@ -1,6 +1,8 @@
 def get_database(query_mode=None):
     import os, requests
 
+    # TODO(prod): Centralize QBO base_url/headers + auto-refresh on 401 with retry-once.
+
     if query_mode is None or not isinstance(query_mode,str):
         print("ERROR: Database failed to provide type for argument")
         return None
@@ -23,9 +25,11 @@ def get_database(query_mode=None):
         "Account": "select Name, Id, AccountType FROM Account MAXRESULTS 1000"
     }
 
-     # QBO API endpoint for querying customers
+    # QBO API endpoint for querying customers
     from support.config import env_mode
     base_url = 'https://quickbooks.api.intuit.com' if env_mode == "production" else 'https://sandbox-quickbooks.api.intuit.com'
+    # TODO(prod): URL-encode the query component; do not inline raw SQL in URL.
+    # TODO(prod): Implement pagination with STARTPOSITION/MAXRESULTS loop for >1000 results.
     url = f"{base_url}/v3/company/{realm_id}/query?query={allowed_queries[query_mode]}&minorversion=75"
         
     headers = {

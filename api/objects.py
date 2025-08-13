@@ -1,5 +1,7 @@
 def post_objects(files=None, object_mode=None):
     print("##############################_POST_BEGIN_##############################")
+    # TODO(prod): Replace prints with structured logging; attach request/job id.
+    # TODO(prod): Validate inputs; return typed/structured results per object (success/failure) for UI.
     if files is None:
         print("WARNING: No files have been uploaded, please upload files")
         return False
@@ -13,7 +15,7 @@ def post_objects(files=None, object_mode=None):
         return False
 
     import concurrent.futures
-    from tqdm import tqdm
+    from tqdm import tqdm  # TODO(prod): remove in server; keep only under debug; add to requirements if retained.
 
     # Determine object file
     object_file_key = None
@@ -31,6 +33,7 @@ def post_objects(files=None, object_mode=None):
 
     # Concurrently post all objects
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        # TODO(prod): Respect QBO rate limits; add retry/backoff (exponential) and jitter on 429/5xx.
         list(tqdm(executor.map(object_threadsafe, list(object_extraction.values())), total=len(list(object_extraction.keys()))))
 
     print("##############################_POST_END_##############################")
@@ -41,6 +44,8 @@ def object_threadsafe(one_object):
 
 def post_one(one_object):
     import os, requests, time, random
+    # TODO(prod): Idempotency: check if object exists (by normalized key) before create; support update/patch if mismatch.
+    # TODO(prod): Do not read tokens from env; inject via a token accessor that refreshes and masks logs.
 
     # Respectful delay to the server
     time.sleep(random.uniform(0.8, 1.2))
@@ -117,6 +122,7 @@ def post_one(one_object):
     response = requests.post(url, json=object_payload, headers=headers)
         
     if response.status_code >= 300:
+         # TODO(prod): Parse QBO error payload; categorize (duplicate, validation, rate limit); retry/backoff where appropriate.
         print(f"WARNING: Did not post {display_name} (duplicate object)")
         return False
         
